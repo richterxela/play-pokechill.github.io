@@ -1284,7 +1284,7 @@ function leaveCombat(){
 
     saved.currentArea = undefined
 
-    setWildAreas()
+    renderTravelAreas()
 
 
         
@@ -3254,7 +3254,7 @@ function typeWeak(myType1, myType2 = null, ranking = 1) { //ts was made by gpt a
 }
 
 
-function returnTypeMultipliers(pkmn) {
+function getDefensiveTypeMultipliers(pokemon) {
     const types = [
         "normal","fire","water","electric","grass","ice","fighting","poison",
         "ground","flying","psychic","bug","rock","ghost","dragon","dark","steel","fairy"
@@ -3264,13 +3264,17 @@ function returnTypeMultipliers(pkmn) {
     const multipliers = types.map(attackingType => {
         return {
             type: attackingType,
-            multiplier: typeEffectiveness(attackingType, pkmn.type)
+            multiplier: typeEffectiveness(attackingType, pokemon.type)
         };
     });
 
     multipliers.sort((a, b) => b.multiplier - a.multiplier);
 
-    return multipliers.map(({type, multiplier}) => {
+    return multipliers;
+}
+
+function returnTypeMultipliers(pokemon) {
+    return getDefensiveTypeMultipliers(pokemon).map(({type, multiplier}) => {
         if(multiplier === 1) return ''; //ignores neutral
         const color = returnTypeColor(type);
         return `<div style="
@@ -3284,6 +3288,24 @@ function returnTypeMultipliers(pkmn) {
             ${type} x${multiplier}
         </div>`;
     }).join('');
+}
+
+function returnTypeMatchupGroups(pokemon) {
+    const matchups = getDefensiveTypeMultipliers(pokemon);
+    const groups = [
+        { label: "Weak to", entries: matchups.filter(entry => entry.multiplier > 1) },
+        { label: "Resists", entries: matchups.filter(entry => entry.multiplier > 0 && entry.multiplier < 1) },
+        { label: "Immune to", entries: matchups.filter(entry => entry.multiplier === 0) }
+    ];
+
+    return groups.map(({label, entries}) => `
+        <div class="pkmn-type-matchup-group">
+            <strong>${label}</strong>
+            <div>${entries.length ? entries.map(({type, multiplier}) => `
+                <span style="background:${returnTypeColor(type)}">${format(type)} ×${multiplier}</span>
+            `).join("") : '<span class="pkmn-type-matchup-empty">None</span>'}</div>
+        </div>
+    `).join("");
 }
 
 
@@ -4056,6 +4078,27 @@ function initialiseArea(){
 
 saved.lastWildlifeRotation = undefined
 
+function renderTravelAreas() {
+    setWildAreas()
+    setDungeonAreas()
+
+    if (saved.tutorialStep === "none") {
+        setEventAreas()
+    } else {
+        document.getElementById("travel-event-header").innerHTML = `
+            <span>Events</span>
+            <div class="rotation-timer">
+                <strong>Rotation ${rotationEventCurrent}/${rotationEventMax}</strong>
+                <div class="time-counter-event"></div>
+            </div>`
+        document.getElementById("travel-event-header").style.backgroundImage = "url(img/bg/mini/special6.png)"
+        document.getElementById("travel-event-listing").innerHTML = '<div class="travel-zone-locked">Complete the tutorial to access events</div>'
+        document.getElementById("event-banner").style.display = "none"
+        document.getElementById("event-banner-category").style.display = "none"
+        updateEventCounters()
+    }
+}
+
 function setWildAreas() {
 
 
@@ -4065,25 +4108,10 @@ function setWildAreas() {
         if (currentWildRotation<=0) currentWildRotation = rotationWildMax
     } 
 
-    document.getElementById("event-banner").style.display = "none"
-    document.getElementById("event-banner-category").style.display = "none"
 
 
-    document.getElementById("explore-selector").innerHTML = `
-            <div style="background: #967546; outline: solid 1px #FF9E3D; color: white; z-index: 2;" onclick="setWildAreas()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="m17.861 3.163l.16.054l1.202.4c.463.155.87.29 1.191.44c.348.162.667.37.911.709s.341.707.385 1.088c.04.353.04.781.04 1.27v8.212c0 .698 0 1.287-.054 1.753c-.056.484-.182.962-.535 1.348a2.25 2.25 0 0 1-.746.538c-.478.212-.971.18-1.448.081c-.46-.096-1.018-.282-1.68-.503l-.043-.014c-1.12-.374-1.505-.49-1.877-.477a2.3 2.3 0 0 0-.441.059c-.363.085-.703.299-1.686.954l-1.382.922l-.14.093c-1.062.709-1.8 1.201-2.664 1.317c-.863.116-1.705-.165-2.915-.57l-.16-.053l-1.202-.4c-.463-.155-.87-.29-1.191-.44c-.348-.162-.667-.37-.911-.71c-.244-.338-.341-.706-.385-1.088c-.04-.353-.04-.78-.04-1.269V8.665c0-.699 0-1.288.054-1.753c.056-.484.182-.962.535-1.348a2.25 2.25 0 0 1 .746-.538c.478-.213.972-.181 1.448-.081c.46.095 1.018.282 1.68.503l.043.014c1.12.373 1.505.49 1.878.477a2.3 2.3 0 0 0 .44-.059c.363-.086.703-.3 1.686-.954l1.382-.922l.14-.094c1.062-.708 1.8-1.2 2.663-1.316c.864-.116 1.706.165 2.916.57m-2.111.943V16.58c.536.058 1.1.246 1.843.494l.125.042c.717.239 1.192.396 1.555.472c.356.074.477.04.532.016a.75.75 0 0 0 .249-.179c.04-.044.11-.149.152-.51c.043-.368.044-.869.044-1.624V7.163c0-.54-.001-.88-.03-1.138c-.028-.239-.072-.328-.112-.382c-.039-.054-.109-.125-.326-.226c-.236-.11-.56-.218-1.07-.389l-1.165-.388c-.887-.296-1.413-.464-1.797-.534m-1.5 12.654V4.434c-.311.18-.71.441-1.276.818l-1.382.922l-.11.073c-.688.46-1.201.802-1.732.994v12.326c.311-.18.71-.442 1.276-.819l1.382-.921l.11-.073c.688-.46 1.201-.802 1.732-.994m-6 3.135V7.42c-.536-.058-1.1-.246-1.843-.494l-.125-.042c-.717-.239-1.192-.396-1.556-.472c-.355-.074-.476-.041-.53-.017a.75.75 0 0 0-.25.18c-.04.043-.11.148-.152.509c-.043.368-.044.87-.044 1.625v8.128c0 .54.001.88.03 1.138c.028.239.072.327.112.382c.039.054.109.125.326.226c.236.11.56.218 1.07.389l1.165.388c.887.295 1.412.463 1.797.534" clip-rule="evenodd"/></svg>                Wild Areas</div>
-            <div onclick="setDungeonAreas()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M4 10a8 8 0 1 1 16 0v8.667c0 1.246 0 1.869-.268 2.333a2 2 0 0 1-.732.732c-.464.268-1.087.268-2.333.268H7.333C6.087 22 5.464 22 5 21.732A2 2 0 0 1 4.268 21C4 20.536 4 19.913 4 18.667z"/><path d="M20 18H9c-.943 0-1.414 0-1.707.293S7 19.057 7 20v2m13-8h-7c-.943 0-1.414 0-1.707.293S11 15.057 11 16v2m9-8h-3c-.943 0-1.414 0-1.707.293S15 11.057 15 12v2"/></g></svg>
-                Dungeons</div>
-            <div onclick="setEventAreas()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m5.658 11.002l-1.47 3.308c-1.856 4.174-2.783 6.261-1.77 7.274s3.098.085 7.272-1.77L13 18.342c2.517-1.119 3.776-1.678 3.976-2.757s-.774-2.053-2.722-4l-1.838-1.839c-1.947-1.948-2.921-2.922-4-2.721c-1.079.2-1.638 1.459-2.757 3.976M6.5 10.5l7 7m-9-2l4 4M16 8l3-3m-4.803-3c.4.667.719 2.4-1.197 4m9 3.803c-.667-.4-2.4-.719-4 1.197m0-9v.02M22 6v.02M21 13v.02M11 3v.02"/></svg>
-                Events</div>
-    `
-
-
-
-    document.getElementById("explore-listing").innerHTML = ""
-    document.getElementById("explore-menu-header").innerHTML = `
+    document.getElementById("travel-wild-listing").innerHTML = ""
+    document.getElementById("travel-wild-header").innerHTML = `
     <div style="display:flex; gap:0.2rem" >
     <span >
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="m17.861 3.163l.16.054l1.202.4c.463.155.87.29 1.191.44c.348.162.667.37.911.709s.341.707.385 1.088c.04.353.04.781.04 1.27v8.212c0 .698 0 1.287-.054 1.753c-.056.484-.182.962-.535 1.348a2.25 2.25 0 0 1-.746.538c-.478.212-.971.18-1.448.081c-.46-.096-1.018-.282-1.68-.503l-.043-.014c-1.12-.374-1.505-.49-1.877-.477a2.3 2.3 0 0 0-.441.059c-.363.085-.703.299-1.686.954l-1.382.922l-.14.093c-1.062.709-1.8 1.201-2.664 1.317c-.863.116-1.705-.165-2.915-.57l-.16-.053l-1.202-.4c-.463-.155-.87-.29-1.191-.44c-.348-.162-.667-.37-.911-.71c-.244-.338-.341-.706-.385-1.088c-.04-.353-.04-.78-.04-1.269V8.665c0-.699 0-1.288.054-1.753c.056-.484.182-.962.535-1.348a2.25 2.25 0 0 1 .746-.538c.478-.213.972-.181 1.448-.081c.46.095 1.018.282 1.68.503l.043.014c1.12.373 1.505.49 1.878.477a2.3 2.3 0 0 0 .44-.059c.363-.086.703-.3 1.686-.954l1.382-.922l.14-.094c1.062-.708 1.8-1.2 2.663-1.316c.864-.116 1.706.165 2.916.57m-2.111.943V16.58c.536.058 1.1.246 1.843.494l.125.042c.717.239 1.192.396 1.555.472c.356.074.477.04.532.016a.75.75 0 0 0 .249-.179c.04-.044.11-.149.152-.51c.043-.368.044-.869.044-1.624V7.163c0-.54-.001-.88-.03-1.138c-.028-.239-.072-.328-.112-.382c-.039-.054-.109-.125-.326-.226c-.236-.11-.56-.218-1.07-.389l-1.165-.388c-.887-.296-1.413-.464-1.797-.534m-1.5 12.654V4.434c-.311.18-.71.441-1.276.818l-1.382.922l-.11.073c-.688.46-1.201.802-1.732.994v12.326c.311-.18.71-.442 1.276-.819l1.382-.921l.11-.073c.688-.46 1.201-.802 1.732-.994m-6 3.135V7.42c-.536-.058-1.1-.246-1.843-.494l-.125-.042c-.717-.239-1.192-.396-1.556-.472c-.355-.074-.476-.041-.53-.017a.75.75 0 0 0-.25.18c-.04.043-.11.148-.152.509c-.043.368-.044.87-.044 1.625v8.128c0 .54.001.88.03 1.138c.028.239.072.327.112.382c.039.054.109.125.326.226c.236.11.56.218 1.07.389l1.165.388c.887.295 1.412.463 1.797.534" clip-rule="evenodd"/></svg>    Wild Areas
@@ -4098,7 +4126,7 @@ function setWildAreas() {
     </div>
     `
 
-    document.getElementById("explore-menu-header").style.backgroundImage = "url(img/bg/forest.png)"
+    document.getElementById("travel-wild-header").style.backgroundImage = "url(img/bg/forest.png)"
 
     let ticketIndex = 0
 
@@ -4149,7 +4177,7 @@ function setWildAreas() {
         </div>
     `;
 
-    document.getElementById("explore-listing").appendChild(div);
+    document.getElementById("travel-wild-listing").appendChild(div);
 
     div.addEventListener("click", e => { 
         tooltipData('seasonPreview', i)
@@ -4239,7 +4267,7 @@ function setWildAreas() {
                     <img class="explore-ticket-sprite sprite-trim" style="z-index: 10;" src="img/pkmn/sprite/${areas.wildlifePark.icon.id}.png">
                 </div>
         `;
-    document.getElementById("explore-listing").appendChild(divPark);
+    document.getElementById("travel-wild-listing").appendChild(divPark);
     divPark.dataset.area = areas.wildlifePark.id
 
     divPark.addEventListener("click", e => { 
@@ -4375,7 +4403,7 @@ function setWildAreas() {
                     <img class="explore-ticket-sprite sprite-trim" style="z-index: 10;" src="img/pkmn/sprite/${areas[i].icon.id}.png">
                 </div>
         `;
-        document.getElementById("explore-listing").appendChild(divAreas);
+        document.getElementById("travel-wild-listing").appendChild(divAreas);
 
     }
     updateDailyCounters()
@@ -4386,23 +4414,10 @@ function setDungeonAreas() {
 
 
 
-        document.getElementById("event-banner").style.display = "none"
-    document.getElementById("event-banner-category").style.display = "none"
 
 
-    document.getElementById("explore-selector").innerHTML = `
-            <div onclick="setWildAreas()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="m17.861 3.163l.16.054l1.202.4c.463.155.87.29 1.191.44c.348.162.667.37.911.709s.341.707.385 1.088c.04.353.04.781.04 1.27v8.212c0 .698 0 1.287-.054 1.753c-.056.484-.182.962-.535 1.348a2.25 2.25 0 0 1-.746.538c-.478.212-.971.18-1.448.081c-.46-.096-1.018-.282-1.68-.503l-.043-.014c-1.12-.374-1.505-.49-1.877-.477a2.3 2.3 0 0 0-.441.059c-.363.085-.703.299-1.686.954l-1.382.922l-.14.093c-1.062.709-1.8 1.201-2.664 1.317c-.863.116-1.705-.165-2.915-.57l-.16-.053l-1.202-.4c-.463-.155-.87-.29-1.191-.44c-.348-.162-.667-.37-.911-.71c-.244-.338-.341-.706-.385-1.088c-.04-.353-.04-.78-.04-1.269V8.665c0-.699 0-1.288.054-1.753c.056-.484.182-.962.535-1.348a2.25 2.25 0 0 1 .746-.538c.478-.213.972-.181 1.448-.081c.46.095 1.018.282 1.68.503l.043.014c1.12.373 1.505.49 1.878.477a2.3 2.3 0 0 0 .44-.059c.363-.086.703-.3 1.686-.954l1.382-.922l.14-.094c1.062-.708 1.8-1.2 2.663-1.316c.864-.116 1.706.165 2.916.57m-2.111.943V16.58c.536.058 1.1.246 1.843.494l.125.042c.717.239 1.192.396 1.555.472c.356.074.477.04.532.016a.75.75 0 0 0 .249-.179c.04-.044.11-.149.152-.51c.043-.368.044-.869.044-1.624V7.163c0-.54-.001-.88-.03-1.138c-.028-.239-.072-.328-.112-.382c-.039-.054-.109-.125-.326-.226c-.236-.11-.56-.218-1.07-.389l-1.165-.388c-.887-.296-1.413-.464-1.797-.534m-1.5 12.654V4.434c-.311.18-.71.441-1.276.818l-1.382.922l-.11.073c-.688.46-1.201.802-1.732.994v12.326c.311-.18.71-.442 1.276-.819l1.382-.921l.11-.073c.688-.46 1.201-.802 1.732-.994m-6 3.135V7.42c-.536-.058-1.1-.246-1.843-.494l-.125-.042c-.717-.239-1.192-.396-1.556-.472c-.355-.074-.476-.041-.53-.017a.75.75 0 0 0-.25.18c-.04.043-.11.148-.152.509c-.043.368-.044.87-.044 1.625v8.128c0 .54.001.88.03 1.138c.028.239.072.327.112.382c.039.054.109.125.326.226c.236.11.56.218 1.07.389l1.165.388c.887.295 1.412.463 1.797.534" clip-rule="evenodd"/></svg>                Wild Areas</div>
-            <div style="background: #58644bff; outline: solid 1px #82df60ff; color: white; z-index: 2;" onclick="setDungeonAreas()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M4 10a8 8 0 1 1 16 0v8.667c0 1.246 0 1.869-.268 2.333a2 2 0 0 1-.732.732c-.464.268-1.087.268-2.333.268H7.333C6.087 22 5.464 22 5 21.732A2 2 0 0 1 4.268 21C4 20.536 4 19.913 4 18.667z"/><path d="M20 18H9c-.943 0-1.414 0-1.707.293S7 19.057 7 20v2m13-8h-7c-.943 0-1.414 0-1.707.293S11 15.057 11 16v2m9-8h-3c-.943 0-1.414 0-1.707.293S15 11.057 15 12v2"/></g></svg>
-                Dungeons</div>
-            <div onclick="setEventAreas()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m5.658 11.002l-1.47 3.308c-1.856 4.174-2.783 6.261-1.77 7.274s3.098.085 7.272-1.77L13 18.342c2.517-1.119 3.776-1.678 3.976-2.757s-.774-2.053-2.722-4l-1.838-1.839c-1.947-1.948-2.921-2.922-4-2.721c-1.079.2-1.638 1.459-2.757 3.976M6.5 10.5l7 7m-9-2l4 4M16 8l3-3m-4.803-3c.4.667.719 2.4-1.197 4m9 3.803c-.667-.4-2.4-.719-4 1.197m0-9v.02M22 6v.02M21 13v.02M11 3v.02"/></svg>
-                Events</div>
-    `
-
-    document.getElementById("explore-listing").innerHTML = ""
-    document.getElementById("explore-menu-header").innerHTML = `
+    document.getElementById("travel-dungeon-listing").innerHTML = ""
+    document.getElementById("travel-dungeon-header").innerHTML = `
     <div style="display:flex; gap:0.2rem" >
     <span >
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M4 10a8 8 0 1 1 16 0v8.667c0 1.246 0 1.869-.268 2.333a2 2 0 0 1-.732.732c-.464.268-1.087.268-2.333.268H7.333C6.087 22 5.464 22 5 21.732A2 2 0 0 1 4.268 21C4 20.536 4 19.913 4 18.667z"/><path d="M20 18H9c-.943 0-1.414 0-1.707.293S7 19.057 7 20v2m13-8h-7c-.943 0-1.414 0-1.707.293S11 15.057 11 16v2m9-8h-3c-.943 0-1.414 0-1.707.293S15 11.057 15 12v2"/></g></svg>
@@ -4420,7 +4435,7 @@ function setDungeonAreas() {
 
 
     `
-    document.getElementById("explore-menu-header").style.backgroundImage = "url(img/bg/cave.png)" 
+    document.getElementById("travel-dungeon-header").style.backgroundImage = "url(img/bg/cave.png)"
     let ticketIndex = 0
 
     for (const i in areas) {
@@ -4484,7 +4499,7 @@ function setDungeonAreas() {
                     <img class="explore-ticket-sprite" style="z-index: 10; scale: 2; image-rendering:pixelated; filter:drop-shadow(rgba(0,0,0,0.4) 2px 2px)" src="img/items/${areas[i].icon.id}.png">
                 </div>
         `;
-        document.getElementById("explore-listing").appendChild(divAreas);
+        document.getElementById("travel-dungeon-listing").appendChild(divAreas);
 
     }
 
@@ -4560,21 +4575,8 @@ function setEventAreas() {
 
 
 
-    document.getElementById("explore-selector").innerHTML = `
-            <div onclick="setWildAreas()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="m17.861 3.163l.16.054l1.202.4c.463.155.87.29 1.191.44c.348.162.667.37.911.709s.341.707.385 1.088c.04.353.04.781.04 1.27v8.212c0 .698 0 1.287-.054 1.753c-.056.484-.182.962-.535 1.348a2.25 2.25 0 0 1-.746.538c-.478.212-.971.18-1.448.081c-.46-.096-1.018-.282-1.68-.503l-.043-.014c-1.12-.374-1.505-.49-1.877-.477a2.3 2.3 0 0 0-.441.059c-.363.085-.703.299-1.686.954l-1.382.922l-.14.093c-1.062.709-1.8 1.201-2.664 1.317c-.863.116-1.705-.165-2.915-.57l-.16-.053l-1.202-.4c-.463-.155-.87-.29-1.191-.44c-.348-.162-.667-.37-.911-.71c-.244-.338-.341-.706-.385-1.088c-.04-.353-.04-.78-.04-1.269V8.665c0-.699 0-1.288.054-1.753c.056-.484.182-.962.535-1.348a2.25 2.25 0 0 1 .746-.538c.478-.213.972-.181 1.448-.081c.46.095 1.018.282 1.68.503l.043.014c1.12.373 1.505.49 1.878.477a2.3 2.3 0 0 0 .44-.059c.363-.086.703-.3 1.686-.954l1.382-.922l.14-.094c1.062-.708 1.8-1.2 2.663-1.316c.864-.116 1.706.165 2.916.57m-2.111.943V16.58c.536.058 1.1.246 1.843.494l.125.042c.717.239 1.192.396 1.555.472c.356.074.477.04.532.016a.75.75 0 0 0 .249-.179c.04-.044.11-.149.152-.51c.043-.368.044-.869.044-1.624V7.163c0-.54-.001-.88-.03-1.138c-.028-.239-.072-.328-.112-.382c-.039-.054-.109-.125-.326-.226c-.236-.11-.56-.218-1.07-.389l-1.165-.388c-.887-.296-1.413-.464-1.797-.534m-1.5 12.654V4.434c-.311.18-.71.441-1.276.818l-1.382.922l-.11.073c-.688.46-1.201.802-1.732.994v12.326c.311-.18.71-.442 1.276-.819l1.382-.921l.11-.073c.688-.46 1.201-.802 1.732-.994m-6 3.135V7.42c-.536-.058-1.1-.246-1.843-.494l-.125-.042c-.717-.239-1.192-.396-1.556-.472c-.355-.074-.476-.041-.53-.017a.75.75 0 0 0-.25.18c-.04.043-.11.148-.152.509c-.043.368-.044.87-.044 1.625v8.128c0 .54.001.88.03 1.138c.028.239.072.327.112.382c.039.054.109.125.326.226c.236.11.56.218 1.07.389l1.165.388c.887.295 1.412.463 1.797.534" clip-rule="evenodd"/></svg>                Wild Areas</div>
-            <div  onclick="setDungeonAreas()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M4 10a8 8 0 1 1 16 0v8.667c0 1.246 0 1.869-.268 2.333a2 2 0 0 1-.732.732c-.464.268-1.087.268-2.333.268H7.333C6.087 22 5.464 22 5 21.732A2 2 0 0 1 4.268 21C4 20.536 4 19.913 4 18.667z"/><path d="M20 18H9c-.943 0-1.414 0-1.707.293S7 19.057 7 20v2m13-8h-7c-.943 0-1.414 0-1.707.293S11 15.057 11 16v2m9-8h-3c-.943 0-1.414 0-1.707.293S15 11.057 15 12v2"/></g></svg>
-                Dungeons</div>
-            <div style="background: #91718B; outline: solid 1px #F97DFF; color: white; z-index: 2;" onclick="setEventAreas()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m5.658 11.002l-1.47 3.308c-1.856 4.174-2.783 6.261-1.77 7.274s3.098.085 7.272-1.77L13 18.342c2.517-1.119 3.776-1.678 3.976-2.757s-.774-2.053-2.722-4l-1.838-1.839c-1.947-1.948-2.921-2.922-4-2.721c-1.079.2-1.638 1.459-2.757 3.976M6.5 10.5l7 7m-9-2l4 4M16 8l3-3m-4.803-3c.4.667.719 2.4-1.197 4m9 3.803c-.667-.4-2.4-.719-4 1.197m0-9v.02M22 6v.02M21 13v.02M11 3v.02"/></svg>
-                Events</div>
-    `
-
-
-
-    document.getElementById("explore-listing").innerHTML = ""
-    document.getElementById("explore-menu-header").innerHTML = `
+    document.getElementById("travel-event-listing").innerHTML = ""
+    document.getElementById("travel-event-header").innerHTML = `
 
 
     <div style="display:flex; gap:0.2rem" >
@@ -4591,7 +4593,7 @@ function setEventAreas() {
     <div class="time-counter-event"></div>
     </div>
     `
-    document.getElementById("explore-menu-header").style.backgroundImage = "url(img/bg/mini/special6.png)" 
+    document.getElementById("travel-event-header").style.backgroundImage = "url(img/bg/mini/special6.png)"
     let ticketIndex = 0
 
   for (const i in areas) {
@@ -4715,7 +4717,7 @@ function setEventAreas() {
         }
 
 
-        document.getElementById("explore-listing").appendChild(divAreas);
+        document.getElementById("travel-event-listing").appendChild(divAreas);
 
 
 
@@ -4809,7 +4811,8 @@ function updateEventCounters() {
     lastEventPeriod = currentPeriod;
 
     getSeed();
-    setEventAreas();
+    if (saved.tutorialStep === "none") setEventAreas();
+    else renderTravelAreas();
     updateItemShop();
 
   }
@@ -6420,7 +6423,7 @@ function switchMenu(id){
         if (saved.currentArea==undefined) {
         document.getElementById(`explore-menu`).style.display = "flex"
         document.getElementById(`explore-menu`).style.zIndex = "40"
-        setWildAreas()
+        renderTravelAreas()
         }
 
         else {
@@ -8526,12 +8529,40 @@ function assignPokerus(){
 saved.geneticPokerus = false
 
 
+function renderGeneticsIvPanel(elementId, pokemon, comparison, isSample) {
+    const panel = document.getElementById(elementId);
+    const title = isSample ? "Sample IVs" : "Host IVs";
+    const stats = [
+        ["hp", "HP"], ["atk", "Attack"], ["def", "Defense"],
+        ["satk", "Sp. Atk"], ["sdef", "Sp. Def"], ["spe", "Speed"]
+    ];
+
+    panel.innerHTML = `<strong>${title}</strong>`;
+    if (!pokemon) {
+        panel.innerHTML += `<div class="genetics-iv-empty">Select a Pokémon</div>`;
+        return;
+    }
+
+    panel.innerHTML += `<div class="genetics-iv-name">${format(pokemon.id)}</div>`;
+    panel.innerHTML += stats.map(([key, label]) => {
+        const rawValue = pokemon.ivs?.[key];
+        const value = rawValue == null ? NaN : Number(rawValue);
+        const otherValue = Number(comparison?.ivs?.[key]);
+        const gain = isSample && Number.isFinite(value) && Number.isFinite(otherValue) && value > otherValue;
+        return `<div class="genetics-iv-row${gain ? " genetics-iv-gain" : ""}">
+            <div>${label}</div><b>${Number.isFinite(value) ? `${value}/6` : "—"}</b>
+        </div>`;
+    }).join("");
+}
+
 function setGeneticMenu(mod, itemUsed){
 
     
 
 const hostPkmn = pkmn[saved.geneticHost];
 const samplePkmn = pkmn[saved.geneticSample];
+renderGeneticsIvPanel("genetics-host-ivs", hostPkmn, null, false);
+renderGeneticsIvPanel("genetics-sample-ivs", samplePkmn, hostPkmn, true);
 currentGeneticsCompatibility = 0
 
 if (saved.geneticHost != undefined) {

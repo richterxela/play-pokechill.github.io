@@ -594,6 +594,12 @@ flex-direction: column;
     z-index: 100;
 }
 
+#main-content:has(#explore-menu[style*="display: flex"]) #menu-button-parent {
+    position: fixed;
+    width: min(20rem, 100vw);
+    left: 0;
+}
+
 #menu-button{
     height: 6rem;
     width: 6rem;
@@ -1284,6 +1290,47 @@ border: 1px solid rgba(255, 255, 255, 0.3);
     height: 100%;
 }
 
+.pkmn-type-matchups {
+    width: min(100%, 31rem);
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    border-radius: 0.3rem;
+    background: var(--dark2);
+    color: white;
+    font-size: 0.85rem;
+}
+
+.pkmn-type-matchups > strong {
+    display: block;
+    margin-bottom: 0.3rem;
+    text-align: center;
+}
+
+.pkmn-type-matchup-group {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    gap: 0.3rem;
+    align-items: start;
+    margin-top: 0.25rem;
+}
+
+.pkmn-type-matchup-group > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem;
+}
+
+.pkmn-type-matchup-group span {
+    border-radius: 0.2rem;
+    padding: 0.1rem 0.3rem;
+    color: white;
+}
+
+.pkmn-type-matchup-group .pkmn-type-matchup-empty {
+    color: var(--light1);
+    background: transparent;
+}
+
 
 
 #pkmn-editor-side-content{
@@ -1700,7 +1747,9 @@ border: 1px solid rgba(255, 255, 255, 0.3);
 #explore-menu {
     position: fixed;
     height: 100%;
-    width: 50%;
+    width: min(96vw, 100rem);
+    left: 50%;
+    transform: translateX(-50%);
     background: 
    
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cg fill='white' fill-opacity='0.03'%3E%3Cpolygon fill-rule='evenodd' points='8 4 12 6 8 8 6 12 4 8 0 6 4 4 6 0 8 4'/%3E%3C/g%3E%3C/svg%3E")
@@ -1725,24 +1774,56 @@ border: 1px solid rgba(255, 255, 255, 0.3);
 @media (max-width: 1000px) {
     #explore-menu {
         width: 100%;
+        left: 0;
+        transform: none;
     }
 }
 
-#explore-listing{
-
-    margin-top: 1rem;
+#travel-zones {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.7rem;
+    width: 100%;
     height: 100%;
-    overflow-y: scroll;
-    width: 95%;
-    padding: 0;
-    display: flex;
-    justify-content: start;
-    align-items: center;
-    flex-direction: column;
-    gap: 0.3rem;
-    position: relative;
-    padding-bottom: 5rem;
+    min-height: 0;
+    padding: 0 0.6rem;
+}
 
+.travel-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 0.4rem;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.travel-zone-listing {
+    width: 95%;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.5rem 0 2rem;
+}
+
+.travel-zone-locked {
+    padding: 1rem;
+    color: white;
+    text-align: center;
+}
+
+@media (max-width: 1100px) {
+    #explore-menu { overflow-y: auto; }
+    #travel-zones { grid-template-columns: 1fr; height: auto; }
+    .travel-zone { overflow: visible; }
+    .travel-zone-listing { flex: none; overflow: visible; padding-bottom: 1rem; }
 }
 
 .hitbox {
@@ -1933,7 +2014,7 @@ border: 1px solid rgba(255, 255, 255, 0.3);
    font-size: 1.2rem;
 }
 
-#explore-menu-header{
+.travel-zone-header{
     height: 8rem;
     width: 100%;
     background-image: url(img/bg/forest.png);
@@ -1960,7 +2041,7 @@ border: 1px solid rgba(255, 255, 255, 0.3);
 
 
 
-#explore-menu-header span {
+.travel-zone-header span {
     height: 2rem;
     width: auto;
     display: flex;
@@ -1979,13 +2060,13 @@ border: 1px solid rgba(255, 255, 255, 0.3);
     z-index: 2;
 }
 
-#explore-menu-header span svg{
+.travel-zone-header span svg{
     height: 2rem;
     width: 2rem;
     margin-right: 0.5rem;
 }
 
-#explore-menu-header span strong{
+.travel-zone-header span strong{
     margin-left: 0.2rem;
     font-weight: 200;
 }
@@ -3712,7 +3793,9 @@ background:
 #genetics-menu{
     position: fixed;
     height: 100%;
-    width: 50%;
+    width: min(94vw, 75rem);
+    left: 50%;
+    transform: translateX(-50%);
     background: var(--dark2);
     z-index: 150;
     overflow: scroll;
@@ -3732,6 +3815,8 @@ background:
 @media (max-width: 1000px) {
     #genetics-menu {
         width: 100%;
+        left: 0;
+        transform: none;
     }
 }
 
@@ -3778,6 +3863,70 @@ background:
     height: 2rem;
     width: 2rem;
     margin-right: 0.5rem;
+}
+
+.genetics-selection-layout {
+    display: grid;
+    grid-template-columns: minmax(10rem, 1fr) minmax(23rem, 2fr) minmax(10rem, 1fr);
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+.genetics-iv-card {
+    align-self: stretch;
+    padding: 0.55rem;
+    border: 1px solid #9572a8;
+    border-radius: 0.4rem;
+    background: rgba(38, 37, 60, 0.85);
+    color: white;
+    text-align: left;
+    font-size: 0.85rem;
+}
+
+.genetics-iv-card > strong,
+.genetics-iv-name {
+    display: block;
+    text-align: center;
+}
+
+.genetics-iv-name {
+    margin: 0.2rem 0 0.4rem;
+    color: #dfc4ef;
+}
+
+.genetics-iv-empty {
+    margin-top: 2rem;
+    text-align: center;
+    color: #c2b7cc;
+}
+
+.genetics-iv-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.1rem 0.25rem;
+    border-radius: 0.2rem;
+}
+
+.genetics-iv-row:nth-child(even) {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.genetics-iv-gain b {
+    color: #9ce7aa;
+}
+
+@media (max-width: 800px) {
+    .genetics-selection-layout {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.5rem;
+    }
+
+    .genetics-header-flex {
+        grid-column: 1 / -1;
+        grid-row: 1;
+    }
 }
 
 .genetics-header-flex{
@@ -4481,6 +4630,19 @@ background:
     paint-order: stroke fill;
     backdrop-filter: blur(1px);
     white-space: nowrap;
+}
+
+.travel-zone #event-banner {
+    height: 5rem;
+    flex-shrink: 0;
+}
+
+.travel-zone #event-banner span {
+    font-size: clamp(1.3rem, 2vw, 2rem);
+}
+
+.travel-zone #event-banner-category {
+    margin: 0.4rem 0;
 }
 
 @media (max-width: 1000px) {
