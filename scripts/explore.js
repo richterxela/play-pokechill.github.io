@@ -9234,6 +9234,79 @@ training.nature = {
 }
 
 
+function renderTrainingPokemonSummary() {
+    const panel = document.getElementById("training-pokemon-summary")
+    const pokemon = pkmn[saved.trainingPokemon]
+    panel.replaceChildren()
+
+    const heading = document.createElement("h2")
+    heading.textContent = "Selected Pokémon"
+    panel.appendChild(heading)
+
+    if (!pokemon) {
+        const empty = document.createElement("p")
+        empty.textContent = "Select a Pokémon to compare its IVs, nature, and current moves."
+        panel.appendChild(empty)
+        return
+    }
+
+    const name = document.createElement("div")
+    name.className = "training-summary-name"
+    name.textContent = `${pokemon.nickname || format(pokemon.id)} · Level ${pokemon.level}`
+    panel.appendChild(name)
+
+    const details = document.createElement("div")
+    details.className = "training-summary-details"
+    panel.appendChild(details)
+
+    const ivSection = document.createElement("div")
+    ivSection.className = "training-summary-section"
+    ivSection.innerHTML = "<h3>IVs</h3>"
+    const ivGrid = document.createElement("div")
+    ivGrid.className = "training-summary-iv-grid"
+    for (const [key, label] of [["hp", "HP"], ["atk", "Attack"], ["def", "Defense"], ["satk", "Sp. Atk"], ["sdef", "Sp. Def"], ["spe", "Speed"]]) {
+        const row = document.createElement("div")
+        const rawValue = pokemon.ivs?.[key]
+        const value = rawValue == null ? NaN : Number(rawValue)
+        row.textContent = `${label}: ${Number.isFinite(value) ? `${value}/6` : "—"}`
+        ivGrid.appendChild(row)
+    }
+    ivSection.appendChild(ivGrid)
+    details.appendChild(ivSection)
+
+    const natureSection = document.createElement("div")
+    natureSection.className = "training-summary-section"
+    natureSection.innerHTML = "<h3>Nature</h3>"
+    const natureName = document.createElement("div")
+    natureName.textContent = pokemon.nature ? format(pokemon.nature) : "None"
+    natureSection.appendChild(natureName)
+    details.appendChild(natureSection)
+
+    const moveSection = document.createElement("div")
+    moveSection.className = "training-summary-section training-summary-moves"
+    moveSection.innerHTML = "<h3>Current moves</h3>"
+    for (const slot of ["slot1", "slot2", "slot3", "slot4"]) {
+        const moveId = pokemon.moves?.[slot]
+        if (!moveId) continue
+        const knownMove = move[moveId]
+        const row = document.createElement("div")
+        row.className = "training-summary-move"
+        row.style.borderColor = knownMove?.type ? returnTypeColor(knownMove.type) : "var(--light1)"
+        const label = document.createElement("strong")
+        label.textContent = format(moveId)
+        const meta = document.createElement("span")
+        meta.textContent = knownMove ? `${knownMove.type ? format(knownMove.type) : "Unknown type"} · ${knownMove.power ? `${knownMove.power} BP` : "Status"} · ${format(knownMove.split || "special")}` : "Move details unavailable"
+        row.append(label, meta)
+        moveSection.appendChild(row)
+    }
+    if (moveSection.childElementCount === 1) {
+        const emptyMoves = document.createElement("p")
+        emptyMoves.textContent = "No moves equipped"
+        moveSection.appendChild(emptyMoves)
+    }
+    details.appendChild(moveSection)
+}
+
 function setTrainingMenu() {
 
 
@@ -9259,6 +9332,7 @@ function setTrainingMenu() {
     if (saved.trainingPokemon!==undefined) {document.getElementById("training-sprite-div").dataset.pkmnEditor = saved.trainingPokemon} else {delete document.getElementById("training-sprite-div").dataset.pkmnEditor;}
 
     document.getElementById("training-list").innerHTML = ""
+    renderTrainingPokemonSummary()
     
     function returnStars(n,color) {
         if (color!=undefined){
