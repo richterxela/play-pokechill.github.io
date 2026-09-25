@@ -1131,6 +1131,7 @@ frontierArray.sort((a, b) => a.data.tier - b.data.tier);
         if (pkmn[poke.id].shiny) document.getElementById("pkmn-editor-name").innerHTML = `<span id="pkmn-editor-nickname">${format(poke.id)}</span> <span style="color:#FF4671">✦</span>${nameTag}`
         document.getElementById("pkmn-editor-level").innerHTML = `Level ${poke.level}`
         document.getElementById("pkmn-editor-type").innerHTML = returnPkmnTypes(poke.id)
+        document.getElementById("pkmn-editor-matchups").innerHTML = returnTypeMatchupGroups(poke)
 
 
         if ( pkmn[currentEditedPkmn].nickname) document.getElementById("pkmn-editor-nickname").textContent = pkmn[currentEditedPkmn].nickname

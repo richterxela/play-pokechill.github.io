@@ -12,7 +12,7 @@ let updateInterval = null;
 async function getLatestCommit() {
   try {
     const res = await fetch(
-      "https://api.github.com/repos/play-pokechill/play-pokechill.github.io/commits/main",
+      "https://api.github.com/repos/richterxela/play-pokechill.github.io/commits/main",
       { cache: "no-cache" }
     );
 
@@ -71,7 +71,7 @@ window.addEventListener("app-update-available", () => {
   banner.style.textAlign = "center";  
   banner.style.cursor = "pointer";  
   banner.style.zIndex = "9999";
-  banner.classList = "update-banner"
+  banner.className = "update-banner"
   banner.onclick = () => {saveGame(); location.reload()};
   document.body.appendChild(banner);
 });
