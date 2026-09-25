@@ -18,7 +18,7 @@
 - Keep the change scoped to the request. Avoid unrelated formatting, generated files, and dependency changes.
 - Review the diff with `git diff --check` and `git diff` before committing.
 - For changed JavaScript files, run `node --check <path>` on each file. This checks syntax only.
-- For behavior or styling changes, serve the repository locally (for example, `python -m http.server 8000`) and check the affected flow in a browser. Check both a fresh game and an existing save when save data or game state is involved. Report any checks that could not be run.
+- For behavior or styling changes, run `node dev-server.cjs` and check the affected flow at `http://127.0.0.1:8765/`. Check both a fresh game and an existing save when save data or game state is involved. Report any checks that could not be run.
 - There is no package manifest or automated test suite in this repository. Do not claim that syntax checks or a page load prove game behavior.
 
 ## Save compatibility
