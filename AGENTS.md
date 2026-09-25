@@ -21,6 +21,12 @@
 - For behavior or styling changes, serve the repository locally (for example, `python -m http.server 8000`) and check the affected flow in a browser. Check both a fresh game and an existing save when save data or game state is involved. Report any checks that could not be run.
 - There is no package manifest or automated test suite in this repository. Do not claim that syntax checks or a page load prove game behavior.
 
+## Save compatibility
+
+- Preserve compatibility with save files exported from the creators' branch. Treat `scripts/save.js`, the `gameData` localStorage key, the structure of `saved` and `team`, and dictionary IDs referenced by saves as compatibility boundaries.
+- Do not edit save, load, import, or export behavior unless a requested change absolutely requires it. Prefer changes that leave the persisted format intact.
+- If a change must affect persisted data, keep old fields and IDs readable, supply safe defaults or a migration for older exports, and test import, reload, and export with a copy of an original-branch save. Use an isolated browser origin or profile and never overwrite a user's real save during testing.
+
 ## Pull request process
 
 1. Commit only the intended files on the feature branch with a clear commit message. Never commit credentials, local save data, or unrelated assets.
