@@ -36,3 +36,9 @@
 5. Give the user the PR URL and its review status. Merge only when the user requests it or the task already authorizes it.
 
 If repository access or a protected action is blocked, finish the local work that is possible and request the specific missing permission with the reason it is needed.
+
+## Sites publishing
+
+- Follow [docs/SITES_PUBLISHING.md](docs/SITES_PUBLISHING.md) when updating the hosted Site. GitHub `origin/main` is the source of truth; the Site has a separate source checkout and production version.
+- Open the existing Site through the Sites connector, then run `node scripts/sync-site-main.cjs` (or pass the returned checkout path) to fast-forward its clean source checkout. Build and package with the bundled Sites workflow before saving and deploying the version.
+- Preserve the Site's current audience. Pass short-lived source credentials through hidden stdin and never commit or write them to disk.
