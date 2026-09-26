@@ -6334,11 +6334,7 @@ function exitTmTeaching(mod){ //what a fucking disgrace of a code i wrote here
 
 function switchMenu(id){
 
-    document.getElementById(`pokedex-menu`).scrollTop = 0
-    saved.currentAreaBuffer = undefined
-
-
-    if (/vs|items|team|dex|dictionary|guide/.test(id) && saved.tutorialStep != "none") {
+    if (/^(vs|items|team|dex|dictionary|guide)$/.test(id) && saved.tutorialStep != "none") {
         document.getElementById("tooltipTop").style.display = `none`
         document.getElementById("tooltipTitle").style.display = `none`
         document.getElementById("tooltipBottom").style.display = `none`
@@ -6383,6 +6379,17 @@ function switchMenu(id){
         return
     }
 
+    // Reject unavailable destinations before closing the editor or changing panels.
+    if ((id === "travel" && saved.currentArea === areas.training.id) ||
+        (["dimension", "team", "vs"].includes(id) && saved.currentArea !== undefined) ||
+        (id === "training" && saved.currentArea !== undefined && saved.currentArea !== areas.training.id)) {
+        openMenu()
+        return
+    }
+
+    document.getElementById(`pokedex-menu`).scrollTop = 0
+    saved.currentAreaBuffer = undefined
+
     // The side menu can now navigate while the Pokémon editor is open.
     // Give that transition the same save and close behavior as its exit button.
     if (document.getElementById("pkmn-editor").style.display === "flex") {
@@ -6420,12 +6427,10 @@ function switchMenu(id){
     document.getElementById(`shop-menu`).style.zIndex = "30"
     document.getElementById(`training-menu`).style.zIndex = "30"
     document.getElementById(`dictionary-menu`).style.zIndex = "30"
+    document.getElementById(`dimension-menu`).style.zIndex = "30"
 
 
     if (id==="travel") {
-
-        if (saved.currentArea == areas.training.id) {openMenu(); return; }
-
 
         if (saved.currentArea==undefined) {
         document.getElementById(`explore-menu`).style.display = "flex"
@@ -6449,10 +6454,6 @@ function switchMenu(id){
 
     if (id==="dimension") {
 
-        if (saved.currentArea!==undefined) {openMenu(); return; }
-
-
-
         document.getElementById(`dimension-menu`).style.display = "flex"
         document.getElementById(`dimension-menu`).style.zIndex = "40"
         updateMegaDimension()
@@ -6466,8 +6467,6 @@ function switchMenu(id){
 
     if (id==="training") {
 
-        if (saved.currentArea!==undefined && saved.currentArea!= areas.training.id) {openMenu(); return; }
-
         if (saved.currentArea==undefined) {
         document.getElementById(`training-menu`).style.display = "flex"
         document.getElementById(`training-menu`).style.zIndex = "40"
@@ -6475,10 +6474,8 @@ function switchMenu(id){
         }
 
         else {
-        setTimeout(() => {
         document.getElementById(`content-explore`).style.display = "flex"
-        document.getElementById(`content-explore`).style.zIndex = "40"         
-        }, 1);
+        document.getElementById(`content-explore`).style.zIndex = "40"
         }
 
 
@@ -6509,9 +6506,6 @@ function switchMenu(id){
 
     if (id==="team") {
 
-        if (saved.currentArea!==undefined) {openMenu(); return; }
-
-
         document.getElementById(`team-menu`).style.display = "flex"
         document.getElementById(`team-menu`).style.zIndex = "40"
         document.getElementById(`preview-team-exit`).style.display = "none"
@@ -6525,7 +6519,6 @@ function switchMenu(id){
     } 
 
     if (id==="vs") {
-        if (saved.currentArea!==undefined) {openMenu(); return; }
         document.getElementById(`vs-menu`).style.display = "flex"
         document.getElementById(`vs-menu`).style.zIndex = "40"
         updateVS()
@@ -6560,7 +6553,8 @@ function switchMenu(id){
     if (id!=="genetics") document.getElementById(`genetics-menu`).style.display = "none"    
     if (id!=="shop") document.getElementById(`shop-menu`).style.display = "none"    
     if (id!=="training") document.getElementById(`training-menu`).style.display = "none"    
-    if (id!=="dimension") document.getElementById(`dimension-menu`).style.display = "none"    
+    if (id!=="dimension") document.getElementById(`dimension-menu`).style.display = "none"
+    if (id!=="dictionary") document.getElementById(`dictionary-menu`).style.display = "none"
 
 
     openMenu()
@@ -8591,7 +8585,7 @@ document.getElementById("genetics-sample-div").innerHTML = `<svg xmlns="http://w
 
 
 if (saved.geneticHost!==undefined) {document.getElementById("genetics-host-div").dataset.pkmnEditor = saved.geneticHost} else {delete document.getElementById("genetics-host-div").dataset.pkmnEditor;}
-if (saved.geneticSample!==undefined) {document.getElementById("genetics-sample-div").dataset.pkmnEditor = saved.geneticSample} else {delete document.getElementById("genetics-host-div").dataset.pkmnEditor;}
+if (saved.geneticSample!==undefined) {document.getElementById("genetics-sample-div").dataset.pkmnEditor = saved.geneticSample} else {delete document.getElementById("genetics-sample-div").dataset.pkmnEditor;}
 
 
 if (saved.geneticHost== undefined || saved.geneticSample == undefined) powerCost = 0
