@@ -3252,16 +3252,32 @@ background:
 }
 
 #team-preview{
-    height: auto;
+    flex: 1;
+    min-height: 0;
     width: 100%;
     display: flex;
     justify-content: start;
     align-items: center;
     flex-direction: column;
-    gap: 0.5rem;
-    overflow-y: scroll;
-    padding: 0.5rem;
+    gap: 0.25rem;
+    overflow-y: auto;
+    padding: 0.25rem 0.5rem 0.75rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     z-index: 40;
+}
+
+#team-preview::-webkit-scrollbar {
+    display: none;
+}
+
+#team-preview .explore-header-infobox {
+    gap: 0.15rem;
+    padding: 0.25rem;
+}
+
+#team-preview .pkmn-movebox {
+    height: 1.9rem;
 }
 
 #team-preview .explore-team-member{
