@@ -4906,18 +4906,16 @@ document.getElementById("pokedex-filter-shiny").addEventListener("change", e => 
 });
 
 const pokerusFilterButton = document.getElementById("pokedex-filter-pokerus")
-const pokerusFilterStates = ["any", "yes", "no"]
+const ribbonFilterButton = document.getElementById("pokedex-filter-ribbon")
 
-function setPokerusFilter(state) {
-    pokerusFilterButton.dataset.state = state
-    pokerusFilterButton.textContent = `Pokérus: ${state === "any" ? "Any" : state === "yes" ? "Yes" : "No"}`
-    pokerusFilterButton.setAttribute("aria-label", `Pokérus filter: ${state}`)
-    pokerusFilterButton.setAttribute("aria-pressed", state === "any" ? "false" : "true")
+function setPokedexToggle(button, label, enabled) {
+    button.setAttribute("aria-pressed", String(enabled))
+    button.textContent = `${label}: ${enabled ? "Only" : "All"}`
+    button.setAttribute("aria-label", `${label} filter: ${enabled ? "Only matching Pokémon" : "All Pokémon"}`)
 }
 
 pokerusFilterButton.addEventListener("click", () => {
-    const next = (pokerusFilterStates.indexOf(pokerusFilterButton.dataset.state) + 1) % pokerusFilterStates.length
-    setPokerusFilter(pokerusFilterStates[next])
+    setPokedexToggle(pokerusFilterButton, "Pokérus", pokerusFilterButton.getAttribute("aria-pressed") !== "true")
     updatePokedex()
 })
 
@@ -4925,9 +4923,10 @@ document.getElementById("pokedex-filter-signature").addEventListener("change", e
   updatePokedex()
 });
 
-document.getElementById("pokedex-filter-ribbon").addEventListener("change", e => {
-  updatePokedex()
-});
+ribbonFilterButton.addEventListener("click", () => {
+    setPokedexToggle(ribbonFilterButton, "Ribbons", ribbonFilterButton.getAttribute("aria-pressed") !== "true")
+    updatePokedex()
+})
 
 document.getElementById("pokedex-filter-division").addEventListener("change", e => {
   updatePokedex()
@@ -4950,9 +4949,9 @@ function resetPokedexFilters(){
     document.getElementById("pokedex-filter-evolution").value = "all";
     document.getElementById("pokedex-filter-ability").value = "all";
     document.getElementById("pokedex-filter-shiny").value = "all";
-    setPokerusFilter("any")
+    setPokedexToggle(pokerusFilterButton, "Pokérus", false)
     document.getElementById("pokedex-filter-signature").value = "all";
-    document.getElementById("pokedex-filter-ribbon").value = "all";
+    setPokedexToggle(ribbonFilterButton, "Ribbons", false)
     document.getElementById("pokedex-sort-filter").value = "default";
 }
 
@@ -5179,9 +5178,8 @@ function updatePokedex(){
     let gotPokemon = 0
     let sortedPokemon = []
 
-    const pokerusFilter = pokerusFilterButton.dataset.state
-    const matchesPokerusFilter = pokemon => pokerusFilter === "any" ||
-        (pokerusFilter === "yes" ? pokemon.pokerus === true : pokemon.pokerus !== true)
+    const pokerusOnly = pokerusFilterButton.getAttribute("aria-pressed") === "true"
+    const ribbonsOnly = ribbonFilterButton.getAttribute("aria-pressed") === "true"
 
 
 
@@ -5192,7 +5190,7 @@ function updatePokedex(){
     for (const i in pkmn) {
         //filters
         if (pkmn[i].ability == undefined) pkmn[i].ability = learnPkmnAbility(pkmn[i].id)
-        if (!matchesPokerusFilter(pkmn[i])) continue
+        if (pokerusOnly && pkmn[i].pokerus !== true) continue
         if (document.getElementById(`pokedex-filter-type`).value !== "all" && !pkmn[i].type.includes(document.getElementById(`pokedex-filter-type`).value)) continue
         if (document.getElementById(`pokedex-filter-type-2`).value !== "all" && !pkmn[i].type.includes(document.getElementById(`pokedex-filter-type-2`).value)) continue
         if (document.getElementById(`pokedex-filter-level`).value !== "all" && !( pkmn[i].level <= (document.getElementById(`pokedex-filter-level`).value) &&  pkmn[i].level >= (document.getElementById(`pokedex-filter-level`).value-19) )    ) continue
@@ -5203,7 +5201,7 @@ function updatePokedex(){
         if (document.getElementById(`pokedex-filter-division`).value !== "all" && returnPkmnDivision(pkmn[i]) !=  document.getElementById(`pokedex-filter-division`).value   ) continue
         //if (document.getElementById(`pokedex-filter-tag`).value !== "all" && document.getElementById(`pokedex-filter-tag`).value !== "none" && pkmn[i].tag!==document.getElementById(`pokedex-filter-tag`).value ) continue
         //if (document.getElementById(`pokedex-filter-tag`).value == "none" && pkmn[i].tag!=undefined ) continue
-        if (document.getElementById(`pokedex-filter-ribbon`).value !== "all" && pkmn[i].ribbons==undefined ) continue
+        if (ribbonsOnly && (!Array.isArray(pkmn[i].ribbons) || pkmn[i].ribbons.length === 0)) continue
         //if (document.getElementById(`pokedex-filter-tag`).value !== "hidden" && pkmn[i].tag=="hidden" ) continue
 
         if (document.getElementById(`pokedex-filter-signature`).value == "false" && pkmn[i].signature==undefined ) continue
@@ -5820,7 +5818,7 @@ if (searchValue) sortedPokemon = searchPokedex(searchValue, fusePkmn).map(r => r
     if (document.getElementById(`pokedex-filter-level`).value !== "all") document.getElementById(`pokedex-total`).style.display = "none"
     //if (document.getElementById(`pokedex-filter-tag`).value !== "all") document.getElementById(`pokedex-total`).style.display = "none"
     if (document.getElementById(`pokedex-filter-ability`).value !== "all") document.getElementById(`pokedex-total`).style.display = "none"
-    if (pokerusFilter !== "any") document.getElementById(`pokedex-total`).style.display = "none"
+    if (pokerusOnly || ribbonsOnly) document.getElementById(`pokedex-total`).style.display = "none"
     if (document.getElementById(`pokedex-filter-evolution`).value !== "all") document.getElementById(`pokedex-total`).style.display = "none"
     if (document.getElementById("pokedex-search").value!="") document.getElementById(`pokedex-total`).style.display = "none"
 

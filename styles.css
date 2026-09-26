@@ -2542,8 +2542,8 @@ z-index: 0;
     align-items: center;
 }
 
-#pokedex-filter-pokerus[data-state="yes"],
-#pokedex-filter-pokerus[data-state="no"] {
+#pokedex-filter-pokerus[aria-pressed="true"],
+#pokedex-filter-ribbon[aria-pressed="true"] {
     background: var(--light2);
     color: var(--dark2);
 }
