@@ -1,0 +1,14 @@
+# Publish the GitHub main branch to Sites
+
+The public Site uses project `appgprj_6ab6a343521881918750b41070723056`. GitHub `origin/main` is the source of truth. The Site has a separate Git checkout and a separate production version; pushing to GitHub alone does not publish it.
+
+In Codex, ask to publish this repository's `origin/main` using this runbook. The Sites connector supplies the temporary credential and performs the final save and deploy calls. A standalone repository command cannot replace those account-authorized calls.
+
+1. Open the existing Site with the Sites connector (`get_site`) and create a short-lived source repository write credential for its project. Create an empty, ignored directory such as `.sites-runtime/source`, then run the bundled `site-workflow.mjs` there with the credential supplied as one JSON line on stdin. Omit `archivePath` for this opening run. Keep the returned `checkout_path` and do not put the credential in a file or shell argument.
+2. From this GitHub repository, run `node scripts/sync-site-main.cjs`. Pass `<checkout_path>` as an argument if the Site workflow opened somewhere other than `.sites-runtime/source`. It fetches `origin/main`, checks that both checkouts belong to the same Site, refuses dirty or divergent Site history, and fast-forwards the Site checkout to the exact GitHub commit. It leaves the current GitHub branch and working files alone.
+3. Run the bundled `site-workflow.mjs` again from the Site checkout with the opening result as `source`, an absolute `archivePath`, and `commands` set to `[["node", "<checkout_path>/build-site.cjs"]]`. Supply the credential through stdin again. The build copies `index.html`, `styles.css`, `font/`, `img/`, and `scripts/` into ignored `dist/`. The workflow pushes the Site source and packages that build. Its returned `commit_sha` must equal the SHA printed by step 2.
+4. Use the Sites connector to `save_site_version` with that returned `commit_sha` and archive path, then `deploy_site_version` with the saved version ID. This Site is public, so preserve its current audience. If deployment is pending, poll `get_deployment_status` until it succeeds and returns the live URL.
+
+The Sites connector and editor access to this project are required to mint the temporary Git credential and save and deploy a version. GitHub read access to the fork's `main` branch and permission to push the Site source are also required. No long-lived token or GitHub Actions secret is needed.
+
+On Windows, dot-source `. .\scripts\site-workflow-env.ps1 -CheckoutPath <checkout_path>` from this repository before each bundled workflow call. It selects Git for Windows Bash, makes tar treat the absolute archive path as local, and trusts only that checkout for Git in the current session. It does not change machine-wide settings or handle the credential. Run the workflow from the Site checkout and supply its credential on hidden stdin.
