@@ -4905,6 +4905,22 @@ document.getElementById("pokedex-filter-shiny").addEventListener("change", e => 
   updatePokedex()
 });
 
+const pokerusFilterButton = document.getElementById("pokedex-filter-pokerus")
+const pokerusFilterStates = ["any", "yes", "no"]
+
+function setPokerusFilter(state) {
+    pokerusFilterButton.dataset.state = state
+    pokerusFilterButton.textContent = `Pokérus: ${state === "any" ? "Any" : state === "yes" ? "Yes" : "No"}`
+    pokerusFilterButton.setAttribute("aria-label", `Pokérus filter: ${state}`)
+    pokerusFilterButton.setAttribute("aria-pressed", state === "any" ? "false" : "true")
+}
+
+pokerusFilterButton.addEventListener("click", () => {
+    const next = (pokerusFilterStates.indexOf(pokerusFilterButton.dataset.state) + 1) % pokerusFilterStates.length
+    setPokerusFilter(pokerusFilterStates[next])
+    updatePokedex()
+})
+
 document.getElementById("pokedex-filter-signature").addEventListener("change", e => {
   updatePokedex()
 });
@@ -4934,8 +4950,10 @@ function resetPokedexFilters(){
     document.getElementById("pokedex-filter-evolution").value = "all";
     document.getElementById("pokedex-filter-ability").value = "all";
     document.getElementById("pokedex-filter-shiny").value = "all";
+    setPokerusFilter("any")
     document.getElementById("pokedex-filter-signature").value = "all";
     document.getElementById("pokedex-filter-ribbon").value = "all";
+    document.getElementById("pokedex-sort-filter").value = "default";
 }
 
 
@@ -4945,14 +4963,14 @@ document.getElementById("pokedex-sort-filter").addEventListener("change", e => {
 
 document.getElementById("pokedex-search").addEventListener("keydown", e => {
   if (e.key === "Enter") {
-    let searchValue = document.getElementById("pokedex-search").value.trim()
-    document.getElementById("pokedex-search").blur()
-    
-    if (searchValue === "") {
-      searchedPkmn = []
-      updatePokedex()
-      return
-    }
+    e.target.blur()
+    updatePokedex()
+  }
+})
+
+function searchPokedex(searchValue, fusePkmn) {
+    searchValue = searchValue.trim()
+    if (searchValue === "") return []
     
     searchValue = searchValue.replace(/\s+or\s+/gi, ' | ')
     
@@ -5088,14 +5106,8 @@ document.getElementById("pokedex-search").addEventListener("keydown", e => {
       results = items.map(item => ({ item }))
     }
     
-    searchedPkmn = results
-    updatePokedex()
-  }
-});
-
-
-let fusePkmn;
-let searchedPkmn = []
+    return results
+}
 
 
 function updatePokedex(){
@@ -5167,6 +5179,10 @@ function updatePokedex(){
     let gotPokemon = 0
     let sortedPokemon = []
 
+    const pokerusFilter = pokerusFilterButton.dataset.state
+    const matchesPokerusFilter = pokemon => pokerusFilter === "any" ||
+        (pokerusFilter === "yes" ? pokemon.pokerus === true : pokemon.pokerus !== true)
+
 
 
 
@@ -5175,7 +5191,8 @@ function updatePokedex(){
     //create an array, used for sorting
     for (const i in pkmn) {
         //filters
-        if (pkmn[i].ability == undefined) pkmn[i].ability = learnPkmnAbility(pkmn[i].id)   
+        if (pkmn[i].ability == undefined) pkmn[i].ability = learnPkmnAbility(pkmn[i].id)
+        if (!matchesPokerusFilter(pkmn[i])) continue
         if (document.getElementById(`pokedex-filter-type`).value !== "all" && !pkmn[i].type.includes(document.getElementById(`pokedex-filter-type`).value)) continue
         if (document.getElementById(`pokedex-filter-type-2`).value !== "all" && !pkmn[i].type.includes(document.getElementById(`pokedex-filter-type-2`).value)) continue
         if (document.getElementById(`pokedex-filter-level`).value !== "all" && !( pkmn[i].level <= (document.getElementById(`pokedex-filter-level`).value) &&  pkmn[i].level >= (document.getElementById(`pokedex-filter-level`).value-19) )    ) continue
@@ -5269,7 +5286,7 @@ if (sort !== "default") {
 }
 
 
-fusePkmn = new Fuse(sortedPokemon, {
+const fusePkmn = new Fuse(sortedPokemon, {
     keys: [ { name: 'name', getFn: obj => obj.id }, 'type', "level", `ability`, `hiddenAbility.id`, `eggMove.id`, `movepool`,'tagShiny','tagPokerus', "tagSignature"],
     threshold: 0.1,
     useExtendedSearch: true,
@@ -5278,9 +5295,8 @@ fusePkmn = new Fuse(sortedPokemon, {
 })
 
 
-if (document.getElementById("pokedex-search").value!="") {
-    sortedPokemon = searchedPkmn.map(r => r.item);
-}
+const searchValue = document.getElementById("pokedex-search").value.trim()
+if (searchValue) sortedPokemon = searchPokedex(searchValue, fusePkmn).map(r => r.item)
 
 
 
@@ -5804,6 +5820,7 @@ if (document.getElementById("pokedex-search").value!="") {
     if (document.getElementById(`pokedex-filter-level`).value !== "all") document.getElementById(`pokedex-total`).style.display = "none"
     //if (document.getElementById(`pokedex-filter-tag`).value !== "all") document.getElementById(`pokedex-total`).style.display = "none"
     if (document.getElementById(`pokedex-filter-ability`).value !== "all") document.getElementById(`pokedex-total`).style.display = "none"
+    if (pokerusFilter !== "any") document.getElementById(`pokedex-total`).style.display = "none"
     if (document.getElementById(`pokedex-filter-evolution`).value !== "all") document.getElementById(`pokedex-total`).style.display = "none"
     if (document.getElementById("pokedex-search").value!="") document.getElementById(`pokedex-total`).style.display = "none"
 

@@ -2542,6 +2542,18 @@ z-index: 0;
     align-items: center;
 }
 
+#pokedex-filter-pokerus[data-state="yes"],
+#pokedex-filter-pokerus[data-state="no"] {
+    background: var(--light2);
+    color: var(--dark2);
+}
+
+#pokedex-filters select:focus-visible,
+#pokedex-filters button:focus-visible {
+    outline: 2px solid var(--light2);
+    outline-offset: 2px;
+}
+
 .clear-filters svg{
     height: 1.2rem;
     width: 1.2rem;
