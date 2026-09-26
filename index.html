@@ -291,7 +291,7 @@
             <div class="separator-solid" style="width: 90%; height: 2px; opacity: 0.5; margin: 0;"></div>
             
             <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-            <select id="pokedex-filter-type">
+            <select id="pokedex-filter-type" aria-label="Type filter">
                 <option value="all">type</option>
                 <option value="normal">normal</option>
                 <option value="fire">fire</option>
@@ -313,8 +313,8 @@
                 <option value="fairy">fairy</option>
             </select>
 
-            <select id="pokedex-filter-type-2">
-                <option value="all">type</option>
+            <select id="pokedex-filter-type-2" aria-label="Additional type filter">
+                <option value="all">and type</option>
                 <option value="normal">normal</option>
                 <option value="fire">fire</option>
                 <option value="water">water</option>
@@ -335,16 +335,16 @@
                 <option value="fairy">fairy</option>
             </select>
 
-            <select id="pokedex-filter-level">
+            <select id="pokedex-filter-level" aria-label="Level filter">
                 <option value="all">level</option>
                 <option value="20">1-20</option>
-                <option value="40">20-40</option>
-                <option value="60">40-60</option>
-                <option value="80">60-80</option>
-                <option value="100">80-100</option>
+                <option value="40">21-40</option>
+                <option value="60">41-60</option>
+                <option value="80">61-80</option>
+                <option value="100">81-100</option>
             </select>
 
-            <select id="pokedex-filter-division">
+            <select id="pokedex-filter-division" aria-label="Division filter">
                 <option value="all">division</option>
                 <option value="D">D</option>
                 <option value="C">C</option>
@@ -355,13 +355,13 @@
                 <option value="SSS">SSS</option>
             </select>
 
-            <select id="pokedex-filter-evolution">
+            <select id="pokedex-filter-evolution" aria-label="Evolution filter">
                 <option value="all">evolution</option>
                 <option value="true">not evolved (all)</option>
                 <option value="level-only">not evolved (level)</option>
             </select>
 
-            <select id="pokedex-filter-ability">
+            <select id="pokedex-filter-ability" aria-label="Ability rarity filter">
                 <option value="all">ability</option>
                 <option value=1>common</option>
                 <option value=2>uncommon</option>
@@ -369,7 +369,7 @@
                 <option value=4>locked HA</option>
             </select>
 
-            <select id="pokedex-filter-shiny">
+            <select id="pokedex-filter-shiny" aria-label="Shiny and star sign filter">
                 <option value="all">shiny</option>
                 <option value=true>is shiny</option>
                 <option value=false>not shiny</option>
@@ -377,16 +377,15 @@
                 <option value="signall">all star sign</option>
             </select>
 
-            <select id="pokedex-filter-signature">
+            <button id="pokedex-filter-pokerus" class="clear-filters" type="button" aria-label="Pokérus filter: All Pokémon" aria-pressed="false" title="Show only Pokémon with Pokérus">Pokérus: All</button>
+
+            <select id="pokedex-filter-signature" aria-label="Signature and egg move filter">
                 <option value="all">signature</option>
                 <option value=false>has signature</option>
                 <option value="egg">has egg move</option>
             </select>
 
-            <select id="pokedex-filter-ribbon">
-                <option value="all">ribbon</option>
-                <option value=true>has ribbon</option>
-            </select>
+            <button id="pokedex-filter-ribbon" class="clear-filters" type="button" aria-label="Ribbon filter: All Pokémon" aria-pressed="false" title="Show only Pokémon with ribbons">Ribbons: All</button>
 
               <select id="pokedex-filter-tag" style="display: none;">
                 <option value="all">tag</option>
@@ -403,7 +402,7 @@
                 <option value="hidden">hidden</option>
             </select>
 
-              <select id="pokedex-sort-filter">
+              <select id="pokedex-sort-filter" aria-label="Sort Pokémon by">
                 <option value="default">sort</option>
                 <option value="level">level</option>
                 <option value="hpTotal">hp Total</option>
@@ -426,10 +425,10 @@
                 <option value="speIv">spe IV's</option>
             </select>
            
-            <div class="clear-filters" onClick="resetPokedexFilters(); updatePokedex()" style="background: rgb(155, 102, 77); cursor: pointer;">Clear Filters</div>
-            <div class="clear-filters" onClick="tagMenu()" style="background: rgb(77, 117, 155); cursor: pointer;">
+            <button class="clear-filters" type="button" onClick="resetPokedexFilters(); updatePokedex()" style="background: rgb(155, 102, 77); cursor: pointer;">Clear Filters</button>
+            <button class="clear-filters" type="button" onClick="tagMenu()" style="background: rgb(77, 117, 155); cursor: pointer;">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M5.5 7A1.5 1.5 0 0 1 4 5.5A1.5 1.5 0 0 1 5.5 4A1.5 1.5 0 0 1 7 5.5A1.5 1.5 0 0 1 5.5 7m15.91 4.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.11 0-2 .89-2 2v7c0 .55.22 1.05.59 1.41l8.99 9c.37.36.87.59 1.42.59s1.05-.23 1.41-.59l7-7c.37-.36.59-.86.59-1.41c0-.56-.23-1.06-.59-1.42"/></svg>    
-            Tags</div>
+            Tags</button>
 
             </div>
             </div>

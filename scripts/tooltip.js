@@ -1896,98 +1896,28 @@ const sortedMovepool = movepool
 
 
 
+const contextDetails = {
+    area: "area", trainer: "trainer", buff: "buff", help: "help",
+    ability: "ability", ribbon: "ribbon", training: "training",
+    move: "move", item: "item", pkmn: "pkmn", pkmnEditor: "pkmnEditor",
+    dictionaryAbility: "dictionaryAbility", dictionaryMove: "dictionaryMove",
+    dictionaryPkmn: "dictionaryPkmn", dictionaryItem: "dictionaryItem",
+    arenaPreview: "arenaPreview", arenaCard: "arenaCard",
+    fieldEffects: "fieldEffects", skills: "skills", seasonPreview: "seasonPreview"
+};
+const contextDetailSelector = Object.keys(contextDetails)
+    .map(key => `[data-${key.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}]`)
+    .join(", ");
+
 document.addEventListener("contextmenu", e => {
+    // Sprites and labels can be nested several levels inside the detail target.
+    const detailTarget = e.target.closest?.(contextDetailSelector);
+    if (!detailTarget) return;
 
-    let el = e.target;
-    if (el.parentElement && el !== el.parentElement) {
-        if (el.parentElement.contains(el) && el.children.length === 0) { el = el.parentElement; }
+    for (const [key, category] of Object.entries(contextDetails)) {
+        if (detailTarget.dataset[key] !== undefined) {
+            tooltipData(category, detailTarget.dataset[key]);
+            return;
+        }
     }
-
-    if (el.dataset.area !== undefined) {
-        tooltipData("area", el.dataset.area)
-    }
-
-    if (el.dataset.trainer !== undefined) {
-        tooltipData("trainer", el.dataset.trainer)
-    }
-
-    if (el.dataset.buff !== undefined) {
-        tooltipData("buff", el.dataset.buff)
-    }
-
-    if (el.dataset.help !== undefined) {
-        tooltipData("help", el.dataset.help)
-    }
-
-    if (el.dataset.ability !== undefined) {
-        tooltipData("ability", el.dataset.ability)
-    }
-
-
-    if (el.dataset.ribbon !== undefined) {
-        tooltipData("ribbon", el.dataset.ribbon)
-    }
-
-
-    if (el.dataset.training !== undefined) {
-        tooltipData("training", el.dataset.training)
-    }
-
-
-    if (el.dataset.move !== undefined) {
-        tooltipData("move", el.dataset.move)
-    }
-
-    if (el.dataset.item !== undefined) {
-        tooltipData("item", el.dataset.item)
-    }
-
-
-    if (el.dataset.pkmn !== undefined) {
-        tooltipData("pkmn", el.dataset.pkmn)
-    }
-
-
-    if (el.dataset.pkmnEditor !== undefined) {
-        tooltipData("pkmnEditor", el.dataset.pkmnEditor)
-    }
-
-
-    if (el.dataset.dictionaryAbility !== undefined) {
-        tooltipData("dictionaryAbility", el.dataset.dictionaryAbility)
-    }
-
-    if (el.dataset.dictionaryMove !== undefined) {
-        tooltipData("dictionaryMove", el.dataset.dictionaryMove)
-    }
-
-    if (el.dataset.dictionaryPkmn !== undefined) {
-        tooltipData("dictionaryPkmn", el.dataset.dictionaryPkmn)
-    }
-
-    if (el.dataset.dictionaryItem !== undefined) {
-        tooltipData("dictionaryItem", el.dataset.dictionaryItem)
-    }
-
-    if (el.dataset.arenaPreview !== undefined) {
-        tooltipData("arenaPreview", el.dataset.arenaPreview)
-    }
-
-    if (el.dataset.arenaCard !== undefined) {
-        tooltipData("arenaCard", el.dataset.arenaCard)
-    }
-
-    if (el.dataset.fieldEffects !== undefined) {
-        tooltipData("fieldEffects", el.dataset.fieldEffects)
-    }
-
-    if (el.dataset.skills !== undefined) {
-        tooltipData("skills", el.dataset.skills)
-    }
-
-    if (el.dataset.seasonPreview !== undefined) {
-        tooltipData("seasonPreview", el.dataset.seasonPreview)
-    }
-
-
 });

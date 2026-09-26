@@ -748,7 +748,18 @@ border: 1px solid rgba(255, 255, 255, 0.3);
     padding: 1rem;
     gap: 0.5rem;
     max-height: 75%;
-    overflow-y: scroll;
+    overflow-y: auto;
+}
+
+#tooltipBox, #area-preview-spawns, #area-preview-items {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#tooltipBox::-webkit-scrollbar,
+#area-preview-spawns::-webkit-scrollbar,
+#area-preview-items::-webkit-scrollbar {
+    display: none;
 }
 
 #tooltipTop {
@@ -2318,7 +2329,7 @@ z-index: 0;
     width: 100%;
         padding-top: 3.3rem;
             max-height: 20rem;
-    overflow-y: scroll;
+    overflow-y: auto;
 
 }
 
@@ -2529,6 +2540,18 @@ z-index: 0;
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+#pokedex-filter-pokerus[aria-pressed="true"],
+#pokedex-filter-ribbon[aria-pressed="true"] {
+    background: var(--light2);
+    color: var(--dark2);
+}
+
+#pokedex-filters select:focus-visible,
+#pokedex-filters button:focus-visible {
+    outline: 2px solid var(--light2);
+    outline-offset: 2px;
 }
 
 .clear-filters svg{
@@ -3241,16 +3264,32 @@ background:
 }
 
 #team-preview{
-    height: auto;
+    flex: 1;
+    min-height: 0;
     width: 100%;
     display: flex;
     justify-content: start;
     align-items: center;
     flex-direction: column;
-    gap: 0.5rem;
-    overflow-y: scroll;
-    padding: 0.5rem;
+    gap: 0.25rem;
+    overflow-y: auto;
+    padding: 0.25rem 0.5rem 0.75rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     z-index: 40;
+}
+
+#team-preview::-webkit-scrollbar {
+    display: none;
+}
+
+#team-preview .explore-header-infobox {
+    gap: 0.15rem;
+    padding: 0.25rem;
+}
+
+#team-preview .pkmn-movebox {
+    height: 1.9rem;
 }
 
 #team-preview .explore-team-member{

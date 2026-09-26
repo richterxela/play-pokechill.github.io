@@ -4905,13 +4905,28 @@ document.getElementById("pokedex-filter-shiny").addEventListener("change", e => 
   updatePokedex()
 });
 
+const pokerusFilterButton = document.getElementById("pokedex-filter-pokerus")
+const ribbonFilterButton = document.getElementById("pokedex-filter-ribbon")
+
+function setPokedexToggle(button, label, enabled) {
+    button.setAttribute("aria-pressed", String(enabled))
+    button.textContent = `${label}: ${enabled ? "Only" : "All"}`
+    button.setAttribute("aria-label", `${label} filter: ${enabled ? "Only matching Pokémon" : "All Pokémon"}`)
+}
+
+pokerusFilterButton.addEventListener("click", () => {
+    setPokedexToggle(pokerusFilterButton, "Pokérus", pokerusFilterButton.getAttribute("aria-pressed") !== "true")
+    updatePokedex()
+})
+
 document.getElementById("pokedex-filter-signature").addEventListener("change", e => {
   updatePokedex()
 });
 
-document.getElementById("pokedex-filter-ribbon").addEventListener("change", e => {
-  updatePokedex()
-});
+ribbonFilterButton.addEventListener("click", () => {
+    setPokedexToggle(ribbonFilterButton, "Ribbons", ribbonFilterButton.getAttribute("aria-pressed") !== "true")
+    updatePokedex()
+})
 
 document.getElementById("pokedex-filter-division").addEventListener("change", e => {
   updatePokedex()
@@ -4934,8 +4949,10 @@ function resetPokedexFilters(){
     document.getElementById("pokedex-filter-evolution").value = "all";
     document.getElementById("pokedex-filter-ability").value = "all";
     document.getElementById("pokedex-filter-shiny").value = "all";
+    setPokedexToggle(pokerusFilterButton, "Pokérus", false)
     document.getElementById("pokedex-filter-signature").value = "all";
-    document.getElementById("pokedex-filter-ribbon").value = "all";
+    setPokedexToggle(ribbonFilterButton, "Ribbons", false)
+    document.getElementById("pokedex-sort-filter").value = "default";
 }
 
 
@@ -4945,14 +4962,14 @@ document.getElementById("pokedex-sort-filter").addEventListener("change", e => {
 
 document.getElementById("pokedex-search").addEventListener("keydown", e => {
   if (e.key === "Enter") {
-    let searchValue = document.getElementById("pokedex-search").value.trim()
-    document.getElementById("pokedex-search").blur()
-    
-    if (searchValue === "") {
-      searchedPkmn = []
-      updatePokedex()
-      return
-    }
+    e.target.blur()
+    updatePokedex()
+  }
+})
+
+function searchPokedex(searchValue, fusePkmn) {
+    searchValue = searchValue.trim()
+    if (searchValue === "") return []
     
     searchValue = searchValue.replace(/\s+or\s+/gi, ' | ')
     
@@ -5088,14 +5105,8 @@ document.getElementById("pokedex-search").addEventListener("keydown", e => {
       results = items.map(item => ({ item }))
     }
     
-    searchedPkmn = results
-    updatePokedex()
-  }
-});
-
-
-let fusePkmn;
-let searchedPkmn = []
+    return results
+}
 
 
 function updatePokedex(){
@@ -5167,6 +5178,9 @@ function updatePokedex(){
     let gotPokemon = 0
     let sortedPokemon = []
 
+    const pokerusOnly = pokerusFilterButton.getAttribute("aria-pressed") === "true"
+    const ribbonsOnly = ribbonFilterButton.getAttribute("aria-pressed") === "true"
+
 
 
 
@@ -5175,7 +5189,8 @@ function updatePokedex(){
     //create an array, used for sorting
     for (const i in pkmn) {
         //filters
-        if (pkmn[i].ability == undefined) pkmn[i].ability = learnPkmnAbility(pkmn[i].id)   
+        if (pkmn[i].ability == undefined) pkmn[i].ability = learnPkmnAbility(pkmn[i].id)
+        if (pokerusOnly && pkmn[i].pokerus !== true) continue
         if (document.getElementById(`pokedex-filter-type`).value !== "all" && !pkmn[i].type.includes(document.getElementById(`pokedex-filter-type`).value)) continue
         if (document.getElementById(`pokedex-filter-type-2`).value !== "all" && !pkmn[i].type.includes(document.getElementById(`pokedex-filter-type-2`).value)) continue
         if (document.getElementById(`pokedex-filter-level`).value !== "all" && !( pkmn[i].level <= (document.getElementById(`pokedex-filter-level`).value) &&  pkmn[i].level >= (document.getElementById(`pokedex-filter-level`).value-19) )    ) continue
@@ -5186,7 +5201,7 @@ function updatePokedex(){
         if (document.getElementById(`pokedex-filter-division`).value !== "all" && returnPkmnDivision(pkmn[i]) !=  document.getElementById(`pokedex-filter-division`).value   ) continue
         //if (document.getElementById(`pokedex-filter-tag`).value !== "all" && document.getElementById(`pokedex-filter-tag`).value !== "none" && pkmn[i].tag!==document.getElementById(`pokedex-filter-tag`).value ) continue
         //if (document.getElementById(`pokedex-filter-tag`).value == "none" && pkmn[i].tag!=undefined ) continue
-        if (document.getElementById(`pokedex-filter-ribbon`).value !== "all" && pkmn[i].ribbons==undefined ) continue
+        if (ribbonsOnly && (!Array.isArray(pkmn[i].ribbons) || pkmn[i].ribbons.length === 0)) continue
         //if (document.getElementById(`pokedex-filter-tag`).value !== "hidden" && pkmn[i].tag=="hidden" ) continue
 
         if (document.getElementById(`pokedex-filter-signature`).value == "false" && pkmn[i].signature==undefined ) continue
@@ -5269,7 +5284,7 @@ if (sort !== "default") {
 }
 
 
-fusePkmn = new Fuse(sortedPokemon, {
+const fusePkmn = new Fuse(sortedPokemon, {
     keys: [ { name: 'name', getFn: obj => obj.id }, 'type', "level", `ability`, `hiddenAbility.id`, `eggMove.id`, `movepool`,'tagShiny','tagPokerus', "tagSignature"],
     threshold: 0.1,
     useExtendedSearch: true,
@@ -5278,9 +5293,8 @@ fusePkmn = new Fuse(sortedPokemon, {
 })
 
 
-if (document.getElementById("pokedex-search").value!="") {
-    sortedPokemon = searchedPkmn.map(r => r.item);
-}
+const searchValue = document.getElementById("pokedex-search").value.trim()
+if (searchValue) sortedPokemon = searchPokedex(searchValue, fusePkmn).map(r => r.item)
 
 
 
@@ -5804,6 +5818,7 @@ if (document.getElementById("pokedex-search").value!="") {
     if (document.getElementById(`pokedex-filter-level`).value !== "all") document.getElementById(`pokedex-total`).style.display = "none"
     //if (document.getElementById(`pokedex-filter-tag`).value !== "all") document.getElementById(`pokedex-total`).style.display = "none"
     if (document.getElementById(`pokedex-filter-ability`).value !== "all") document.getElementById(`pokedex-total`).style.display = "none"
+    if (pokerusOnly || ribbonsOnly) document.getElementById(`pokedex-total`).style.display = "none"
     if (document.getElementById(`pokedex-filter-evolution`).value !== "all") document.getElementById(`pokedex-total`).style.display = "none"
     if (document.getElementById("pokedex-search").value!="") document.getElementById(`pokedex-total`).style.display = "none"
 
@@ -6334,11 +6349,7 @@ function exitTmTeaching(mod){ //what a fucking disgrace of a code i wrote here
 
 function switchMenu(id){
 
-    document.getElementById(`pokedex-menu`).scrollTop = 0
-    saved.currentAreaBuffer = undefined
-
-
-    if (/vs|items|team|dex|dictionary|guide/.test(id) && saved.tutorialStep != "none") {
+    if (/^(vs|items|team|dex|dictionary|guide)$/.test(id) && saved.tutorialStep != "none") {
         document.getElementById("tooltipTop").style.display = `none`
         document.getElementById("tooltipTitle").style.display = `none`
         document.getElementById("tooltipBottom").style.display = `none`
@@ -6383,6 +6394,17 @@ function switchMenu(id){
         return
     }
 
+    // Reject unavailable destinations before closing the editor or changing panels.
+    if ((id === "travel" && saved.currentArea === areas.training.id) ||
+        (["dimension", "team", "vs"].includes(id) && saved.currentArea !== undefined) ||
+        (id === "training" && saved.currentArea !== undefined && saved.currentArea !== areas.training.id)) {
+        openMenu()
+        return
+    }
+
+    document.getElementById(`pokedex-menu`).scrollTop = 0
+    saved.currentAreaBuffer = undefined
+
     // The side menu can now navigate while the Pokémon editor is open.
     // Give that transition the same save and close behavior as its exit button.
     if (document.getElementById("pkmn-editor").style.display === "flex") {
@@ -6420,12 +6442,10 @@ function switchMenu(id){
     document.getElementById(`shop-menu`).style.zIndex = "30"
     document.getElementById(`training-menu`).style.zIndex = "30"
     document.getElementById(`dictionary-menu`).style.zIndex = "30"
+    document.getElementById(`dimension-menu`).style.zIndex = "30"
 
 
     if (id==="travel") {
-
-        if (saved.currentArea == areas.training.id) {openMenu(); return; }
-
 
         if (saved.currentArea==undefined) {
         document.getElementById(`explore-menu`).style.display = "flex"
@@ -6449,10 +6469,6 @@ function switchMenu(id){
 
     if (id==="dimension") {
 
-        if (saved.currentArea!==undefined) {openMenu(); return; }
-
-
-
         document.getElementById(`dimension-menu`).style.display = "flex"
         document.getElementById(`dimension-menu`).style.zIndex = "40"
         updateMegaDimension()
@@ -6466,8 +6482,6 @@ function switchMenu(id){
 
     if (id==="training") {
 
-        if (saved.currentArea!==undefined && saved.currentArea!= areas.training.id) {openMenu(); return; }
-
         if (saved.currentArea==undefined) {
         document.getElementById(`training-menu`).style.display = "flex"
         document.getElementById(`training-menu`).style.zIndex = "40"
@@ -6475,10 +6489,8 @@ function switchMenu(id){
         }
 
         else {
-        setTimeout(() => {
         document.getElementById(`content-explore`).style.display = "flex"
-        document.getElementById(`content-explore`).style.zIndex = "40"         
-        }, 1);
+        document.getElementById(`content-explore`).style.zIndex = "40"
         }
 
 
@@ -6509,9 +6521,6 @@ function switchMenu(id){
 
     if (id==="team") {
 
-        if (saved.currentArea!==undefined) {openMenu(); return; }
-
-
         document.getElementById(`team-menu`).style.display = "flex"
         document.getElementById(`team-menu`).style.zIndex = "40"
         document.getElementById(`preview-team-exit`).style.display = "none"
@@ -6525,7 +6534,6 @@ function switchMenu(id){
     } 
 
     if (id==="vs") {
-        if (saved.currentArea!==undefined) {openMenu(); return; }
         document.getElementById(`vs-menu`).style.display = "flex"
         document.getElementById(`vs-menu`).style.zIndex = "40"
         updateVS()
@@ -6560,7 +6568,8 @@ function switchMenu(id){
     if (id!=="genetics") document.getElementById(`genetics-menu`).style.display = "none"    
     if (id!=="shop") document.getElementById(`shop-menu`).style.display = "none"    
     if (id!=="training") document.getElementById(`training-menu`).style.display = "none"    
-    if (id!=="dimension") document.getElementById(`dimension-menu`).style.display = "none"    
+    if (id!=="dimension") document.getElementById(`dimension-menu`).style.display = "none"
+    if (id!=="dictionary") document.getElementById(`dictionary-menu`).style.display = "none"
 
 
     openMenu()
@@ -8591,7 +8600,7 @@ document.getElementById("genetics-sample-div").innerHTML = `<svg xmlns="http://w
 
 
 if (saved.geneticHost!==undefined) {document.getElementById("genetics-host-div").dataset.pkmnEditor = saved.geneticHost} else {delete document.getElementById("genetics-host-div").dataset.pkmnEditor;}
-if (saved.geneticSample!==undefined) {document.getElementById("genetics-sample-div").dataset.pkmnEditor = saved.geneticSample} else {delete document.getElementById("genetics-host-div").dataset.pkmnEditor;}
+if (saved.geneticSample!==undefined) {document.getElementById("genetics-sample-div").dataset.pkmnEditor = saved.geneticSample} else {delete document.getElementById("genetics-sample-div").dataset.pkmnEditor;}
 
 
 if (saved.geneticHost== undefined || saved.geneticSample == undefined) powerCost = 0
