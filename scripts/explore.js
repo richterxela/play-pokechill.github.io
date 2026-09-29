@@ -10310,7 +10310,9 @@ function renamePokemon(){
 
 
 
-saved.lastDimensionRotation = 1
+function isDimensionBlueprintInRotation(blueprint) {
+    return blueprint.rotation === 0 || blueprint.rotation === rotationDimensionCurrent
+}
 
 function assignMegaDimension(){
 
@@ -10318,6 +10320,7 @@ function assignMegaDimension(){
 
     for (const i in areas){
         if (areas[i].type != "dimensionBlueprint") continue
+        if (!isDimensionBlueprintInRotation(areas[i])) continue
 
         areas[`dimensionRaid`+areas[i].tier].difficulty = areas[i].difficulty
         areas[`dimensionRaid`+areas[i].tier].level = areas[i].level
@@ -10334,8 +10337,9 @@ function assignMegaDimension(){
 
 
 
-    if (saved.lastDimensionRotation == rotationEventCurrent) return
-    if (saved.lastDimensionRotation != rotationEventCurrent) { saved.lastDimensionRotation = rotationEventCurrent }
+    if (saved.lastDimensionRotation === undefined) saved.lastDimensionRotation = rotationDimensionCurrent
+    if (saved.lastDimensionRotation == rotationDimensionCurrent) return
+    saved.lastDimensionRotation = rotationDimensionCurrent
 
 
     item.megaShard.got = 0
@@ -10437,7 +10441,7 @@ function updateMegaDimension(tier){
 
     for (const i in areas){
         if (areas[i].type != "dimensionBlueprint") continue
-        if (areas[i].rotation != rotationDimensionCurrent) continue 
+        if (!isDimensionBlueprintInRotation(areas[i])) continue
 
 
         const div = document.createElement("div")
@@ -10506,7 +10510,7 @@ function updateMegaDimension(tier){
 
         for (const i in areas){
         if (areas[i].type != "dimensionBlueprint") continue
-        if (areas[i].rotation != rotationDimensionCurrent) continue 
+        if (!isDimensionBlueprintInRotation(areas[i])) continue
         if (areas[i].tier != tier) continue
 
 

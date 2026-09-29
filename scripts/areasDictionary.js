@@ -5842,7 +5842,7 @@ areas.frontierBattleFactory = {
 
 
 
-let rotationDimensionMax = 1;
+let rotationDimensionMax = 5;
 
 
 
@@ -6032,7 +6032,7 @@ areas.dimensionPalkia = {
     type: `dimensionBlueprint`,
     icon: pkmn.palkia,
     tier: 1,
-    rotation: 1,
+    rotation: 0, // Available in every rotation.
     difficulty: tier4difficulty,
     level : 100,
     team : {
@@ -6060,11 +6060,75 @@ areas.dimensionPikachuGmax = {
     skills : {3 : skill.ironWill.id, 2 : skill.electroblast.id}
 }
 
+areas.dimensionGengarGmax = {
+    type: `dimensionBlueprint`,
+    icon: pkmn.gengarGmax,
+    tier: 2,
+    rotation: 2,
+    difficulty: tier4difficulty,
+    level: 100,
+    team: {
+        slot1: pkmn.gengarGmax,
+        slot1Moves: [move.shadowBall.id, move.sludgeWave.id, move.darkPulse.id, move.willOWisp.id],
+    },
+    reward: [pkmn.gengarGmax, item.whiteApricorn],
+    fieldEffect: [field.noMercy.id, field.stealthRocks.id, field.thickFog.id],
+    skills: {3: skill.ironSpirit.id, 2: skill.toxiblast.id}
+}
+
+areas.dimensionLaprasGmax = {
+    type: `dimensionBlueprint`,
+    icon: pkmn.laprasGmax,
+    tier: 2,
+    rotation: 3,
+    difficulty: tier4difficulty,
+    level: 100,
+    team: {
+        slot1: pkmn.laprasGmax,
+        slot1Moves: [move.surf.id, move.iceBeam.id, move.thunderbolt.id, move.sparklingAria.id],
+    },
+    reward: [pkmn.laprasGmax, item.whiteApricorn],
+    fieldEffect: [field.noMercy.id, field.stealthRocks.id, field.fierceHail.id],
+    skills: {3: skill.ironWill.id, 2: skill.cryoblast.id}
+}
+
+areas.dimensionCorviknightGmax = {
+    type: `dimensionBlueprint`,
+    icon: pkmn.corviknightGmax,
+    tier: 2,
+    rotation: 4,
+    difficulty: tier4difficulty,
+    level: 100,
+    team: {
+        slot1: pkmn.corviknightGmax,
+        slot1Moves: [move.braveBird.id, move.ironHead.id, move.bodyPress.id, move.ironDefense.id],
+    },
+    reward: [pkmn.corviknightGmax, item.whiteApricorn],
+    fieldEffect: [field.noMercy.id, field.stealthRocks.id, field.ironBody.id],
+    skills: {3: skill.ironWill.id, 2: skill.demoralisingRoar.id}
+}
+
+areas.dimensionHattereneGmax = {
+    type: `dimensionBlueprint`,
+    icon: pkmn.hattereneGmax,
+    tier: 2,
+    rotation: 5,
+    difficulty: tier4difficulty,
+    level: 100,
+    team: {
+        slot1: pkmn.hattereneGmax,
+        slot1Moves: [move.psychic.id, move.moonblast.id, move.mysticalFire.id, move.calmMind.id],
+    },
+    reward: [pkmn.hattereneGmax, item.whiteApricorn],
+    fieldEffect: [field.noMercy.id, field.stealthRocks.id, field.fatiguingCurse.id],
+    skills: {3: skill.ironSpirit.id, 2: skill.demoralisingRoar.id}
+}
+
 areas.dimensionKyuremWhite = {
     type: `dimensionBlueprint`,
     icon: pkmn.kyuremWhite,
     tier: 3,
-    rotation: 1,
+    rotation: 0, // Available in every rotation.
     difficulty: tier4difficulty,
     level : 100,
     team : {
@@ -6081,7 +6145,7 @@ areas.dimensionMegaRayquaza = {
     type: `dimensionBlueprint`,
     icon: pkmn.megaRayquaza,
     tier: 4,
-    rotation: 1,
+    rotation: 0, // Available in every rotation.
     difficulty: tier4difficulty,
     level : 100,
     team : {
