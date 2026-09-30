@@ -6529,6 +6529,11 @@ transform: translateY(-1rem);
     transition: 0.1s;
 }
 
+#dimension-portal-wrapper .dimension-pokemon:focus-visible{
+    outline: 2px solid #b9e1f1;
+    border-radius: 1rem;
+}
+
 
 
 .dimension-sprite{
@@ -6566,23 +6571,25 @@ transform: translateY(-1rem);
 
 #dimension-portal-wrapper{
     width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: space-evenly;
-    align-items: start;
-    align-content: start;
-    justify-items: start;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    justify-items: center;
+    gap: 0.5rem;
 }
 
 #dimension-portal-wrapper .dimension-pokemon{
-    scale: 0.8;
+    scale: 0.7;
+    margin: -1.5rem;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 700px) {
+#dimension-portal-wrapper{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 #dimension-portal-wrapper .dimension-pokemon{
     scale: 0.6;
-    margin: -1rem;
+    margin: -2rem;
 }
 }
 

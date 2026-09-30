@@ -791,22 +791,22 @@ item.blackApricorn = {
 
 item.megaShard = {
     type: "key",
-    info: function() {return `Can be used to catch Pokemon in the Mega-Dimension. Expires after the current Mega-Dimension rotation ends`},
+    info: function() {return `Can be used to catch Pokemon in the Mega-Dimension`},
 }
 
 item.megaPiece = {
     type: "key",
-    info: function() {return `Can be used to catch Pokemon in the Mega-Dimension. Expires after the current Mega-Dimension rotation ends`},
+    info: function() {return `Can be used to catch Pokemon in the Mega-Dimension`},
 }
 
 item.megaChunk = {
     type: "key",
-    info: function() {return `Can be used to catch Pokemon in the Mega-Dimension. Expires after the current Mega-Dimension rotation ends`},
+    info: function() {return `Can be used to catch Pokemon in the Mega-Dimension`},
 }
 
 item.megaCluster = {
     type: "key",
-    info: function() {return `Can be used to catch Pokemon in the Mega-Dimension. Expires after the current Mega-Dimension rotation ends`},
+    info: function() {return `Can be used to catch Pokemon in the Mega-Dimension`},
 }
 
 item.primalEarth = {

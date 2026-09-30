@@ -5842,7 +5842,6 @@ areas.frontierBattleFactory = {
 
 
 
-let rotationDimensionMax = 5;
 
 
 
@@ -6021,7 +6020,6 @@ t4: omniboost + wonder guard
 */
 
 
-//rotation 1
 
 //t1: box legends, ash greninja, rayquaza
 //t2: gmax,  mewtwo, regigigas, etc
@@ -6030,9 +6028,9 @@ t4: omniboost + wonder guard
 
 areas.dimensionPalkia = {
     type: `dimensionBlueprint`,
+    raidId: `dimensionRaid1`,
     icon: pkmn.palkia,
     tier: 1,
-    rotation: 0, // Available in every rotation.
     difficulty: tier4difficulty,
     level : 100,
     team : {
@@ -6046,9 +6044,9 @@ areas.dimensionPalkia = {
 
 areas.dimensionPikachuGmax = {
     type: `dimensionBlueprint`,
+    raidId: `dimensionRaid2`,
     icon: pkmn.pikachuGmax,
     tier: 2,
-    rotation: 1,
     difficulty: tier4difficulty,
     level : 100,
     team : {
@@ -6062,9 +6060,9 @@ areas.dimensionPikachuGmax = {
 
 areas.dimensionGengarGmax = {
     type: `dimensionBlueprint`,
+    raidId: `dimensionRaidGengarGmax`,
     icon: pkmn.gengarGmax,
     tier: 2,
-    rotation: 2,
     difficulty: tier4difficulty,
     level: 100,
     team: {
@@ -6078,9 +6076,9 @@ areas.dimensionGengarGmax = {
 
 areas.dimensionLaprasGmax = {
     type: `dimensionBlueprint`,
+    raidId: `dimensionRaidLaprasGmax`,
     icon: pkmn.laprasGmax,
     tier: 2,
-    rotation: 3,
     difficulty: tier4difficulty,
     level: 100,
     team: {
@@ -6094,9 +6092,9 @@ areas.dimensionLaprasGmax = {
 
 areas.dimensionCorviknightGmax = {
     type: `dimensionBlueprint`,
+    raidId: `dimensionRaidCorviknightGmax`,
     icon: pkmn.corviknightGmax,
     tier: 2,
-    rotation: 4,
     difficulty: tier4difficulty,
     level: 100,
     team: {
@@ -6110,9 +6108,9 @@ areas.dimensionCorviknightGmax = {
 
 areas.dimensionHattereneGmax = {
     type: `dimensionBlueprint`,
+    raidId: `dimensionRaidHattereneGmax`,
     icon: pkmn.hattereneGmax,
     tier: 2,
-    rotation: 5,
     difficulty: tier4difficulty,
     level: 100,
     team: {
@@ -6126,9 +6124,9 @@ areas.dimensionHattereneGmax = {
 
 areas.dimensionKyuremWhite = {
     type: `dimensionBlueprint`,
+    raidId: `dimensionRaid3`,
     icon: pkmn.kyuremWhite,
     tier: 3,
-    rotation: 0, // Available in every rotation.
     difficulty: tier4difficulty,
     level : 100,
     team : {
@@ -6143,9 +6141,9 @@ areas.dimensionKyuremWhite = {
 
 areas.dimensionMegaRayquaza = {
     type: `dimensionBlueprint`,
+    raidId: `dimensionRaid4`,
     icon: pkmn.megaRayquaza,
     tier: 4,
-    rotation: 0, // Available in every rotation.
     difficulty: tier4difficulty,
     level : 100,
     team : {
@@ -6155,6 +6153,17 @@ areas.dimensionMegaRayquaza = {
     reward : [pkmn.magikarp],
     fieldEffect : [field.noMercy.id, field.stealthRocks.id, field.ironBody.id, field.wonderWard.id ],
     skills : {3 : skill.omniboost.id, 2 : skill.suddenDeath.id, 1 : skill.demoralisingRoar.id}
+}
+
+// Keep dimensionRaid2 for existing saves and give each additional G-Max boss
+// its own encounter state, while sharing the tier-two entry cost and rules.
+for (const [id, name] of [
+    [`dimensionRaidGengarGmax`, `Gengar G-Max Wormhole`],
+    [`dimensionRaidLaprasGmax`, `Lapras G-Max Wormhole`],
+    [`dimensionRaidCorviknightGmax`, `Corviknight G-Max Wormhole`],
+    [`dimensionRaidHattereneGmax`, `Hatterene G-Max Wormhole`],
+]) {
+    areas[id] = { ...areas.dimensionRaid2, name }
 }
 
 
