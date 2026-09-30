@@ -4738,7 +4738,6 @@ let rotationEventCurrent = 1;
 let rotationWildCurrent = 1;
 let rotationDungeonCurrent = 1;
 let rotationFrontierCurrent = 1;
-let rotationDimensionCurrent = 1;
 
 let dailySeed = 0
 
@@ -4761,7 +4760,6 @@ function getSeed() {
   const period = Math.floor(dayNumber / 3);
   rotationEventCurrent = ((period-3) % rotationEventMax) + 1;
   rotationFrontierCurrent = (period % rotationFrontierMax) + 1;
-  rotationDimensionCurrent = (period % rotationDimensionMax) + 1;
 
   return dayNumber;
 }
@@ -10310,88 +10308,37 @@ function renamePokemon(){
 
 
 
-saved.lastDimensionRotation = 1
-
 function assignMegaDimension(){
+    for (const id in areas){
+        const blueprint = areas[id]
+        if (blueprint.type !== "dimensionBlueprint") continue
 
-
-
-    for (const i in areas){
-        if (areas[i].type != "dimensionBlueprint") continue
-
-        areas[`dimensionRaid`+areas[i].tier].difficulty = areas[i].difficulty
-        areas[`dimensionRaid`+areas[i].tier].level = areas[i].level
-        areas[`dimensionRaid`+areas[i].tier].team = areas[i].team
-        areas[`dimensionRaid`+areas[i].tier].reward = areas[i].reward
-        areas[`dimensionRaid`+areas[i].tier].icon = areas[i].icon
-
-         
-        areas[`dimensionRift`+areas[i].tier].fieldEffect = undefined
-        areas[`dimensionRaid`+areas[i].tier].fieldEffect = areas[i].fieldEffect
-        areas[`dimensionRaid`+areas[i].tier].skills = areas[i].skills
-
+        const raid = areas[blueprint.raidId]
+        raid.difficulty = blueprint.difficulty
+        raid.level = blueprint.level
+        raid.team = blueprint.team
+        raid.reward = blueprint.reward
+        raid.icon = blueprint.icon
+        raid.fieldEffect = blueprint.fieldEffect
+        raid.skills = blueprint.skills
+        areas[`dimensionRift${blueprint.tier}`].fieldEffect = undefined
     }
 
+    const allTypes = ['normal', 'fire', 'water', 'electric', 'grass', 'ice',
+                      'fighting', 'poison', 'ground', 'flying', 'psychic',
+                      'bug', 'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy']
 
-
-    if (saved.lastDimensionRotation == rotationEventCurrent) return
-    if (saved.lastDimensionRotation != rotationEventCurrent) { saved.lastDimensionRotation = rotationEventCurrent }
-
-
-    item.megaShard.got = 0
-    item.megaPiece.got = 0
-    item.megaChunk.got = 0
-    item.megaCluster.got = 0
-
-    const allTypes = ['normal', 'fire', 'water', 'electric', 'grass', 'ice', 
-                      'fighting', 'poison', 'ground', 'flying', 'psychic', 
-                      'bug', 'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy'];
-
-
-    
-    areas.dimensionRift1.spawns = {
-        common : [pkmn[randomDivisionPkmn("S",arrayPick(allTypes))], pkmn[randomDivisionPkmn("S",arrayPick(allTypes))], pkmn[randomDivisionPkmn("S",arrayPick(allTypes))]],
+    for (let tier = 1; tier <= 4; tier++) {
+        const rift = areas[`dimensionRift${tier}`]
+        if (rift.spawns?.common?.length !== 1 || rift.spawns.common[0]?.id !== pkmn.magikarp.id) continue
+        rift.spawns = {
+            common: Array.from({length: 3}, () => pkmn[randomDivisionPkmn("S", arrayPick(allTypes))]),
+        }
     }
-
-    areas.dimensionRift2.spawns = {
-        common : [pkmn[randomDivisionPkmn("S",arrayPick(allTypes))], pkmn[randomDivisionPkmn("S",arrayPick(allTypes))], pkmn[randomDivisionPkmn("S",arrayPick(allTypes))]],
-    }
-
-    areas.dimensionRift3.spawns = {
-        common : [pkmn[randomDivisionPkmn("S",arrayPick(allTypes))], pkmn[randomDivisionPkmn("S",arrayPick(allTypes))], pkmn[randomDivisionPkmn("S",arrayPick(allTypes))]],
-    }
-
-    areas.dimensionRift4.spawns = {
-        common : [pkmn[randomDivisionPkmn("S",arrayPick(allTypes))], pkmn[randomDivisionPkmn("S",arrayPick(allTypes))], pkmn[randomDivisionPkmn("S",arrayPick(allTypes))]],
-    }
-
-
-
-
-
-
-    //}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 
-
-function updateMegaDimension(tier){
+function updateMegaDimension(blueprintId){
 
 
 
@@ -10403,7 +10350,7 @@ function updateMegaDimension(tier){
     areas.dimensionRift4.icon = arrayPick(areas.dimensionRift4.spawns.common)
 
 
-    if (tier==undefined) {
+    if (blueprintId==undefined) {
 
 
 
@@ -10419,14 +10366,7 @@ function updateMegaDimension(tier){
     <span class="header-help" data-help="Dimension"><svg  style="opacity:0.8; pointer-events:none" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><g fill="currentColor"><g opacity="0.2"><path d="M12.739 17.213a2 2 0 1 1-4 0a2 2 0 0 1 4 0"/><path fill-rule="evenodd" d="M10.71 5.765c-.67 0-1.245.2-1.65.486c-.39.276-.583.597-.639.874a1.45 1.45 0 0 1-2.842-.574c.227-1.126.925-2.045 1.809-2.67c.92-.65 2.086-1.016 3.322-1.016c2.557 0 5.208 1.71 5.208 4.456c0 1.59-.945 2.876-2.169 3.626a1.45 1.45 0 1 1-1.514-2.474c.57-.349.783-.794.783-1.152c0-.574-.715-1.556-2.308-1.556" clip-rule="evenodd"/><path fill-rule="evenodd" d="M10.71 9.63c.8 0 1.45.648 1.45 1.45v1.502a1.45 1.45 0 1 1-2.9 0V11.08c0-.8.649-1.45 1.45-1.45" clip-rule="evenodd"/><path fill-rule="evenodd" d="M14.239 8.966a1.45 1.45 0 0 1-.5 1.99l-2.284 1.367a1.45 1.45 0 0 1-1.49-2.488l2.285-1.368a1.45 1.45 0 0 1 1.989.5" clip-rule="evenodd"/></g><path d="M11 16.25a1.25 1.25 0 1 1-2.5 0a1.25 1.25 0 0 1 2.5 0"/><path fill-rule="evenodd" d="M9.71 4.065c-.807 0-1.524.24-2.053.614c-.51.36-.825.826-.922 1.308a.75.75 0 1 1-1.47-.297c.186-.922.762-1.696 1.526-2.236c.796-.562 1.82-.89 2.919-.89c2.325 0 4.508 1.535 4.508 3.757c0 1.292-.768 2.376-1.834 3.029a.75.75 0 0 1-.784-1.28c.729-.446 1.118-1.093 1.118-1.749c0-1.099-1.182-2.256-3.008-2.256m0 5.265a.75.75 0 0 1 .75.75v1.502a.75.75 0 1 1-1.5 0V10.08a.75.75 0 0 1 .75-.75" clip-rule="evenodd"/><path fill-rule="evenodd" d="M12.638 8.326a.75.75 0 0 1-.258 1.029l-2.285 1.368a.75.75 0 1 1-.77-1.287l2.285-1.368a.75.75 0 0 1 1.028.258" clip-rule="evenodd"/></g></svg></span>
     </div>
 
-    <div class="rotation-timer" style="background:transparent; color:white; border-color:white">
-    <strong><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M6.94 2c.416 0 .753.324.753.724v1.46c.668-.012 1.417-.012 2.26-.012h4.015c.842 0 1.591 0 2.259.013v-1.46c0-.4.337-.725.753-.725s.753.324.753.724V4.25c1.445.111 2.394.384 3.09 1.055c.698.67.982 1.582 1.097 2.972L22 9H2v-.724c.116-1.39.4-2.302 1.097-2.972s1.645-.944 3.09-1.055V2.724c0-.4.337-.724.753-.724"/><path fill="currentColor" d="M22 14v-2c0-.839-.004-2.335-.017-3H2.01c-.013.665-.01 2.161-.01 3v2c0 3.771 0 5.657 1.172 6.828S6.228 22 10 22h4c3.77 0 5.656 0 6.828-1.172S22 17.772 22 14" opacity="0.5"/><path fill="currentColor" d="M18 17a1 1 0 1 1-2 0a1 1 0 0 1 2 0m0-4a1 1 0 1 1-2 0a1 1 0 0 1 2 0m-5 4a1 1 0 1 1-2 0a1 1 0 0 1 2 0m0-4a1 1 0 1 1-2 0a1 1 0 0 1 2 0m-5 4a1 1 0 1 1-2 0a1 1 0 0 1 2 0m0-4a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg>
-    Rotation ${rotationDimensionCurrent}/${rotationDimensionMax}</strong>
-    <div class="time-counter-event" style="background:#9F50B5"></div>
-    </div>
     `
-
-    updateEventCounters()
 
 
     document.getElementById("dimension-listing").innerHTML = `
@@ -10437,13 +10377,16 @@ function updateMegaDimension(tier){
 
     for (const i in areas){
         if (areas[i].type != "dimensionBlueprint") continue
-        if (areas[i].rotation != rotationDimensionCurrent) continue 
 
 
         const div = document.createElement("div")
         div.dataset.pkmn = areas[i].icon.id
 
         div.className = "dimension-pokemon"
+        div.setAttribute("role", "button")
+        div.tabIndex = 0
+        div.setAttribute("aria-label", `${format(areas[i].icon.id)} wormhole, tier ${areas[i].tier}`)
+        div.title = `${format(areas[i].icon.id)} wormhole`
 
         let dimensionIndicator = `<div style="filter:hue-rotate(100deg)" id="dimension-indicator">★</div>`
         if (areas[i].tier == 2) dimensionIndicator = `<div style="filter:hue-rotate(0deg)" id="dimension-indicator">★★</div>`
@@ -10463,12 +10406,11 @@ function updateMegaDimension(tier){
 
 
 
-        div.addEventListener("click", e => { 
-
-            updateMegaDimension(areas[i].tier)
-
-
-
+        div.addEventListener("click", () => updateMegaDimension(i))
+        div.addEventListener("keydown", e => {
+            if (e.key !== "Enter" && e.key !== " ") return
+            e.preventDefault()
+            updateMegaDimension(i)
         })
 
 
@@ -10498,6 +10440,9 @@ function updateMegaDimension(tier){
 
 
     document.getElementById("dimension-listing").innerHTML = ""
+    const blueprint = areas[blueprintId]
+    if (!blueprint || blueprint.type !== "dimensionBlueprint") return
+    const tier = blueprint.tier
 
 
 
@@ -10506,8 +10451,7 @@ function updateMegaDimension(tier){
 
         for (const i in areas){
         if (areas[i].type != "dimensionBlueprint") continue
-        if (areas[i].rotation != rotationDimensionCurrent) continue 
-        if (areas[i].tier != tier) continue
+        if (i !== blueprintId) continue
 
 
         const div = document.createElement("div")
@@ -10558,8 +10502,7 @@ function updateMegaDimension(tier){
 
 
     for (const i in areas){
-        if (areas[i].type != "dimension") continue
-        if (areas[i].tier != tier) continue
+        if (i !== `dimensionRift${tier}` && i !== blueprint.raidId) continue
 
 
 

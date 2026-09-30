@@ -205,7 +205,6 @@ function updateGameVersion() {
 
 
   if (saved.version<4.0){
-  saved.lastDimensionRotation = 10
   assignMegaDimension()
   }
 
